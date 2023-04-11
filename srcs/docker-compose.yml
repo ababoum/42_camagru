@@ -1,0 +1,39 @@
+version: '3.8'
+
+############### DOCKERS ##################
+services:
+  #### PHP SERVER ####
+  php-apache-environment:
+    container_name: php-apache
+    image: camagru-client:camagru
+    build:
+      context: requirements/php/
+    env_file:
+      - .env
+    networks:
+      - camagru_network
+    ports:
+      - 8000:80
+    depends_on:
+      - database
+    restart: always
+
+  #### MYSQL DATABASE ####
+  database:
+    container_name: mysql
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - camagru_network
+    ports:
+      - "9906:3306"
+
+############### NETWORKS ##################
+
+networks:
+  camagru_network:
