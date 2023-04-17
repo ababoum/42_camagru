@@ -21,7 +21,9 @@ services:
   #### MYSQL DATABASE ####
   database:
     container_name: mysql
-    image: mysql:5.7
+    image: camagru-database:camagru
+    build:
+      context: requirements/database/
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -30,8 +32,20 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
       - camagru_network
+
+  #### PHPMYADMIN ####
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
     ports:
-      - "9906:3306"
+        - '8080:80'
+    restart: always
+    environment:
+        PMA_HOST: mysql
+    networks:
+      - camagru_network
+    depends_on:
+      - database
 
 ############### NETWORKS ##################
 
