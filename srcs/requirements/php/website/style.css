@@ -1,5 +1,5 @@
 body {
-    background: #91a716;
+    background: #75718f;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,9 +14,9 @@ body {
 
 form {
     width: 1000px;
-    border: 3px solid rgb(177, 142, 142);
+    border: 3px solid rgb(0, 0, 0);
     padding: 20px;
-    background: rgb(85, 54, 54);
+    background: rgb(43, 122, 146);
     border-radius: 20px;
 }
 

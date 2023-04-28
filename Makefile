@@ -10,4 +10,6 @@ clean:
 	docker-compose --env-file srcs/.env -f srcs/docker-compose.yml stop
 	docker-compose --env-file srcs/.env -f srcs/docker-compose.yml down
 
+re: clean all
+
 .PHONY: all clean 

@@ -1,20 +1,25 @@
-<?php
-//These are the defined authentication environment in the db service
+<!DOCTYPE html>
+<html>
 
-// The MySQL service named in the docker-compose.yml.
-$host = getenv('MYSQL_HOST');
+<head>
+    <title>Camagru - Login page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
 
-// Database use name
-$user = getenv('MYSQL_USER');
+<body>
+    <form action="login.php" method="post">
+        <h2>LOGIN</h2>
+        <?php if (isset($_GET['error'])) { ?>
+            <p class="error">
+                <?php echo $_GET['error']; ?>
+            </p>
+        <?php } ?>
+        <label>Username</label>
+        <input type="text" name="uname" placeholder="Username"><br>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Password"><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
 
-//database user password
-$pass = getenv('MYSQL_PASSWORD');
-
-// check the MySQL connection status
-$conn = new mysqli($host, $user, $pass);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} else {
-    echo "Connected to MySQL server successfully!";
-}
-?>
+</html>
