@@ -1,25 +1,26 @@
-<!DOCTYPE html>
-<html>
+<?php
+session_start();
+if (isset($_SESSION['id']) && isset($_SESSION['username'])) {
+    ?>
+    <!DOCTYPE html>
+    <html>
 
-<head>
-    <title>Camagru - Login page</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
+    <head>
+        <title>HOME</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
 
-<body>
-    <form action="login.php" method="post">
-        <h2>LOGIN</h2>
-        <?php if (isset($_GET['error'])) { ?>
-            <p class="error">
-                <?php echo $_GET['error']; ?>
-            </p>
-        <?php } ?>
-        <label>Username</label>
-        <input type="text" name="uname" placeholder="Username"><br>
-        <label>Password</label>
-        <input type="password" name="password" placeholder="Password"><br>
-        <button type="submit">Login</button>
-    </form>
-</body>
+    <body>
+        <h1>Hello,
+            <?php echo $_SESSION['username']; ?>
+        </h1>
+        <a href="logout.php">Logout</a>
+    </body>
 
-</html>
+    </html>
+<?php
+} else {
+    header("Location: login_form.php");
+    exit();
+}
+?>
