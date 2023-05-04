@@ -1,10 +1,10 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1>Take a stylized picture with Camagru!</h1>
+<h1 class="title is-1 has-text-centered">Take a stylized picture with Camagru!</h1>
 <p><a href="index.php">Go back to the main page</a></p>
 
-<div class="news">
+<div class="box">
     <h3>
         <?= htmlspecialchars($post->title) ?>
     </h3>

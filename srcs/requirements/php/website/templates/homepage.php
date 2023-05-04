@@ -1,14 +1,14 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1>Take a stylized picture with Camagru!</h1>
+<h1 class="title is-1 has-text-centered">Take a stylized picture with Camagru!</h1>
 <p>Last pictures taken:</p>
 
 <?php
 foreach ($posts as $post) {
     ?>
-    <div>
-        <h3>
+    <div class="box">
+        <h3 class="title is-3">
             <?= htmlspecialchars($post->title); ?>
         </h3>
         <em>Taken on
