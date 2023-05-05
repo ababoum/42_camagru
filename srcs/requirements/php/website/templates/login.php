@@ -18,6 +18,7 @@
         <input class="button is-dark" value="Log in" type="submit" />
     </div>
 </form>
+<p>Don't have an account? <a href="index.php?action=signup">Sign up</a></p>
 <?php $content = ob_get_clean(); ?>
 
 <?php require('layout.php') ?>

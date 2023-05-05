@@ -25,4 +25,6 @@ foreach ($posts as $post) {
 ?>
 <?php $content = ob_get_clean(); ?>
 
+<?php require_once('header.php') ?>
 <?php require('layout.php') ?>
+<?php require_once('footer.php') ?>

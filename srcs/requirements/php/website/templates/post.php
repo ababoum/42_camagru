@@ -2,7 +2,6 @@
 
 <?php ob_start(); ?>
 <h1 class="title is-1 has-text-centered">Take a stylized picture with Camagru!</h1>
-<p><a href="index.php">Go back to the main page</a></p>
 
 <div class="box">
     <h3>
@@ -47,4 +46,6 @@ foreach ($comments as $comment) {
 ?>
 <?php $content = ob_get_clean(); ?>
 
+<?php require_once('header.php') ?>
 <?php require('layout.php') ?>
+<?php require_once('footer.php') ?>
