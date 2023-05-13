@@ -4,6 +4,19 @@
 <h1 class="title is-1">Log in</h1>
 <p class="subtitle">You need to be logged in to get access to Camagru</p>
 
+<!-- NOTIFICATION -->
+<?php
+if (isset($_SESSION['info'])) {
+?>
+    <div class="notification is-primary">
+        <?= $_SESSION['info'] ?>
+    </div>
+<?php
+    unset($_SESSION['info']);
+}
+?>
+
+<!-- LOGIN FORM -->
 <form action="index.php?action=login" method="post">
     <div>
         <label for="username">Username</label><br />
@@ -18,7 +31,9 @@
         <input class="button is-dark" value="Log in" type="submit" />
     </div>
 </form>
-<p>Don't have an account? <a href="index.php?action=signup">Sign up</a></p>
+<div>
+<a href="index.php?action=reset_password">Forgotten password?</a> — Don't have an account? <a href="index.php?action=signup">Sign up</a>
+</div>
 <?php $content = ob_get_clean(); ?>
 
 <?php require('layout.php') ?>

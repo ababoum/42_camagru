@@ -18,7 +18,7 @@
     </div>
     <div>
         <label for="password">Confirm password</label><br />
-        <input class="input" type="password" id="re_password" name="re_password" placeholder="Confirm Password" />
+        <input class="input" type="password" id="re_password" name="re_password" placeholder="Confirm password" />
     </div>
     <br>
     <div>

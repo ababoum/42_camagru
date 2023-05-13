@@ -15,6 +15,11 @@ class Login
         require('templates/login.php');
     }
 
+    public function resetPassword()
+    {
+        require('templates/reset_password.php');
+    }
+
     public function logIn(string $username, string $password)
     {
         $userRepository = new UserRepository();
@@ -26,6 +31,14 @@ class Login
         $_SESSION['identifier'] = $user->identifier;
         $_SESSION['email'] = $user->email;
 
+        header('Location: index.php');
+    }
+
+    public function sendPasswordLink(string $email)
+    {
+        // TODO: Send email with link to reset password
+
+        $_SESSION['info'] = 'A link to reset your password has been sent to your email address.';
         header('Location: index.php');
     }
 }
