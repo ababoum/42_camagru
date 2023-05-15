@@ -19,7 +19,7 @@ class Signup
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
-        $user = $userRepository->createUser($username, $password, $re_password, $email);
+        $user = $userRepository->create_user($username, $password, $re_password, $email);
 
         if ($user === false) {
             throw new \Exception('Impossible to create a new user!');
@@ -28,6 +28,10 @@ class Signup
         $_SESSION['username'] = $user->username;
         $_SESSION['identifier'] = $user->identifier;
         $_SESSION['email'] = $user->email;
+        $_SESSION['active'] = $user->active;
+
+        $_SESSION['info'] = 'Your account has been created successfully! You are now logged in.
+        <b>You still need to verify your email address. Please check your inbox.</b>';
 
         header('Location: index.php');
     }

@@ -9,7 +9,13 @@ CREATE TABLE users (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   username varchar(30) NOT NULL DEFAULT '',
   email varchar(100) NOT NULL DEFAULT '',
-  password varchar(255) NOT NULL DEFAULT ''
+  password varchar(255) NOT NULL DEFAULT '',
+  active tinyint(1) NOT NULL DEFAULT 0,
+  activation_code varchar(255) NOT NULL DEFAULT '',
+  activation_expiration DATETIME NOT NULL,
+  activated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 DROP TABLE IF EXISTS posts;

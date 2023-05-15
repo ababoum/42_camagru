@@ -17,19 +17,20 @@ class Profile
         $user->identifier = $_SESSION['identifier'];
         $user->username = $_SESSION['username'];
         $user->email = $_SESSION['email'];
+        $user->active = $_SESSION['active'];
 
         require('templates/profile.php');
     }
 
-    public function updateUser(string $id, string $username, string $email, string $password, string $re_password)
+    public function update_user(string $id, string $username, string $email, string $password, string $re_password)
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
 
-        $user = $userRepository->getUser($id);
+        $user = $userRepository->get_user_by_id($id);
 
         if (!empty($username) && $username !== $user->username) {
-            $user->username = $userRepository->updateUsername($id, $username);
+            $user->username = $userRepository->update_username($id, $username);
         }
 
         if (!empty($email) && $email !== $user->email) {

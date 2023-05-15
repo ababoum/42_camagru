@@ -24,12 +24,13 @@ class Login
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
-        $user = $userRepository->logUser($username, $password);
+        $user = $userRepository->log_user($username, $password);
 
         $_SESSION['loggedin'] = true;
         $_SESSION['username'] = $user->username;
         $_SESSION['identifier'] = $user->identifier;
         $_SESSION['email'] = $user->email;
+        $_SESSION['active'] = $user->active;
 
         header('Location: index.php');
     }

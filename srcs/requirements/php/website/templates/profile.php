@@ -22,6 +22,19 @@ if (isset($_SESSION['info'])) {
 }
 ?>
 
+<!-- WARNING -->
+<?php
+if (isset($_SESSION['active']) && $_SESSION['active'] == 0) {
+?>
+    <div class="notification is-warning">
+        <strong>Warning!</strong> Your account is not active yet. Please check your inbox and click on the link to activate your account.
+    </div>
+<?php
+    unset($_SESSION['info']);
+}
+?>
+
+
 <!-- UPDATE INFO FORM -->
 <form action="index.php?action=update_user" method="post">
     <div>

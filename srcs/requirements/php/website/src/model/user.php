@@ -3,14 +3,17 @@
 namespace Application\Model\User;
 
 require_once('src/lib/database.php');
+require_once('src/lib/auth.php');
 
 use Application\Lib\Database\DatabaseConnection;
+use Application\Lib\Auth\Auth;
 
 class User
 {
     public string $username;
     public string $identifier;
     public string $email;
+    public bool $active;
 }
 
 class UserRepository
@@ -25,7 +28,7 @@ class UserRepository
         return $data;
     }
 
-    public function logUser(string $username, string $password): User
+    public function log_user(string $username, string $password): User
     {
         // Validate username
         $username = $this->validate($username);
@@ -40,7 +43,7 @@ class UserRepository
         }
 
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, password FROM users WHERE username = ?"
+            "SELECT id, username, email, password, active FROM users WHERE username = ?"
         );
         $statement->execute([$username]);
         $row = $statement->fetch();
@@ -58,11 +61,12 @@ class UserRepository
         $user->identifier = $row['id'];
         $user->username = $row['username'];
         $user->email = $row['email'];
+        $user->active = $row['active'];
 
         return $user;
     }
 
-    public function createUser(string $username, string $password, string $re_password, string $email): User
+    public function create_user(string $username, string $password, string $re_password, string $email): User
     {
         // Check if a field is empty
         if (empty($username) || empty($password) || empty($re_password) || empty($email)) {
@@ -113,32 +117,43 @@ class UserRepository
             throw new \Exception('Email already exists.');
         }
 
-
         // Hash the password
         $password = password_hash($password, PASSWORD_DEFAULT);
 
+        // Generate an activation code
+        $activation_code = Auth::generate_activation_code();
+        $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
+        $activation_expiry = date('Y-m-d H:i:s', strtotime('+1 day'));
+
+
         // Insert the user into the database
         $statement = $this->connection->getConnection()->prepare(
-            "INSERT INTO users (username, password, email) VALUES (?, ?, ?)"
+            "INSERT INTO users (username, password, email, activation_code, activation_expiration)
+            VALUES (?, ?, ?, ?, ?)"
         );
-        $statement->execute([$username, $password, $email]);
+        $statement->execute([$username, $password, $email, $hashed_activation_code, $activation_expiry]);
 
         if ($statement->rowCount() === 0) {
             throw new \Exception('Something went wrong. Please try again.');
         }
 
-        // Log the user in
+        // Send an activation email
+        Auth::send_activation_email($email, $activation_code);
+
+        // Prepare a user instance to log the user in
         $user = new User();
         $user->identifier = $this->connection->getConnection()->lastInsertId();
         $user->username = $username;
         $user->email = $email;
+        $user->active = false;
 
         return $user;
     }
 
-    public function getUser(string $id): User {
+    public function get_user_by_id(string $id): User
+    {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT username, email FROM users WHERE id = ?"
+            "SELECT username, email, active FROM users WHERE id = ?"
         );
         $statement->execute([$id]);
         $row = $statement->fetch();
@@ -151,11 +166,49 @@ class UserRepository
         $user->identifier = $id;
         $user->username = $row['username'];
         $user->email = $row['email'];
+        $user->active = $row['active'];
 
         return $user;
     }
-    
-    public function updateUsername(string $id, string $new_username): string {
+
+    public function find_unverified_user(string $email, string $activation_code)
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            'SELECT id, activation_code, activation_expiry < now() as expired
+            FROM users
+            WHERE active = 0 AND email = ?'
+        );
+        $statement->execute([$email]);
+        $row = $statement->fetch();
+
+        if ($row === false) {
+            throw new \Exception('Email doesn\'t exist, or user is already verified.');
+        }
+
+        if ($row['expired'] === 1) {
+            throw new \Exception('Activation code has expired.');
+        }
+
+        if (!password_verify($activation_code, $row['activation_code'])) {
+            throw new \Exception('Incorrect activation code.');
+        }
+
+        return $row['id'];
+    }
+
+    public function activate_user(int $user_id): bool
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            'UPDATE users
+            SET active = 1,
+                activated_at = CURRENT_TIMESTAMP
+            WHERE id = ?'
+        );
+        return $statement->execute([$user_id]);
+    }
+
+    public function update_username(string $id, string $new_username): string
+    {
         // Validate username
         $new_username = $this->validate($new_username);
         if (empty($new_username)) {
@@ -166,7 +219,7 @@ class UserRepository
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $new_username)) {
             throw new \Exception('Username can only contain letters, numbers and underscores.');
         }
-        
+
         // Check if username already exists
         $statement = $this->connection->getConnection()->prepare(
             "SELECT id FROM users WHERE username = ?"
@@ -176,21 +229,22 @@ class UserRepository
         if ($row !== false) {
             throw new \Exception('Username already exists.');
         }
-        
+
         // Update the username
         $statement = $this->connection->getConnection()->prepare(
             "UPDATE users SET username = ? WHERE id = ?"
         );
         $statement->execute([$new_username, $id]);
-        
+
         if ($statement->rowCount() === 0) {
             throw new \Exception('Something went wrong. Please try again.');
         }
-        
+
         return $new_username;
     }
 
-    public function updateEmail(string $id, string $new_email): string {
+    public function updateEmail(string $id, string $new_email): string
+    {
         // Validate email
         $new_email = $this->validate($new_email);
         if (empty($new_email)) {
@@ -225,7 +279,8 @@ class UserRepository
         return $new_email;
     }
 
-    public function updatePassword(string $id, string $new_password) {
+    public function updatePassword(string $id, string $new_password)
+    {
         // Validate password
         if (empty($new_password)) {
             throw new \Exception('Password is required.');
@@ -253,5 +308,4 @@ class UserRepository
             throw new \Exception('Something went wrong. Please try again.');
         }
     }
-
 }
