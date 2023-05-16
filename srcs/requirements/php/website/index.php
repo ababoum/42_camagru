@@ -102,10 +102,10 @@ try {
             }
             // ACTIVATION RELATED ROUTES
             else if ($_GET['action'] === 'activate') {
-                if (isset($_GET['email']) && isset($_GET['code'])) {
+                if (isset($_GET['email']) && isset($_GET['activation_code'])) {
                     $email = $_GET['email'];
-                    $code = $_GET['code'];
-                    (new Auth())->activate_user($email, $code);
+                    $activation_code = $_GET['activation_code'];
+                    (new Auth())->activate_user($email, $activation_code);
                 } else {
                     throw new Exception('No email or activation code sent.');
                 }

@@ -25,9 +25,15 @@
                 Take a picture
             </a>
 
-            <a class="navbar-item" href="index.php?action=logout">
-                Log out
-            </a>
+            <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) : ?>
+                <a class="navbar-item" href="index.php?action=logout">
+                    Log out
+                </a>
+            <?php else : ?>
+                <a class="navbar-item" href="index.php">
+                    Log in
+                </a>
+            <?php endif; ?>
 
         </div>
     </div>

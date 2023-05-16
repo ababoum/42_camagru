@@ -123,7 +123,7 @@ class UserRepository
         // Generate an activation code
         $activation_code = AuthTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
-        $activation_expiry = date('Y-m-d H:i:s', strtotime('+1 day'));
+        $activation_expiration = date('Y-m-d H:i:s', strtotime('+1 day'));
 
 
         // Insert the user into the database
@@ -131,7 +131,7 @@ class UserRepository
             "INSERT INTO users (username, password, email, activation_code, activation_expiration)
             VALUES (?, ?, ?, ?, ?)"
         );
-        $statement->execute([$username, $password, $email, $hashed_activation_code, $activation_expiry]);
+        $statement->execute([$username, $password, $email, $hashed_activation_code, $activation_expiration]);
 
         if ($statement->rowCount() === 0) {
             throw new \Exception('Something went wrong. Please try again.');
@@ -174,7 +174,7 @@ class UserRepository
     public function find_unverified_user(string $email, string $activation_code)
     {
         $statement = $this->connection->getConnection()->prepare(
-            'SELECT id, activation_code, activation_expiry < now() as expired
+            'SELECT id, activation_code, activation_expiration < now() as expired
             FROM users
             WHERE active = 0 AND email = ?'
         );

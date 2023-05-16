@@ -46,7 +46,7 @@ class Auth
         // Generate an activation code
         $activation_code = AuthTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
-        $activation_expiry = date('Y-m-d H:i:s', strtotime('+1 day'));
+        $activation_expiration = date('Y-m-d H:i:s', strtotime('+1 day'));
 
         // Update the user record
         $statement = $userRepository->connection->getConnection()->prepare(
@@ -55,7 +55,7 @@ class Auth
             WHERE id = ?'
         );
 
-        if (!$statement->execute([$hashed_activation_code, $activation_expiry, $user_id])) {
+        if (!$statement->execute([$hashed_activation_code, $activation_expiration, $user_id])) {
             throw new \Exception("Something went wrong. Try again later.");
         }
 
