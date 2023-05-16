@@ -3,6 +3,7 @@
 require_once('src/controllers/comment/add.php');
 require_once('src/controllers/homepage.php');
 require_once('src/controllers/post.php');
+require_once('src/controllers/webcam.php');
 require_once('src/controllers/login.php');
 require_once('src/controllers/signup.php');
 require_once('src/controllers/profile.php');
@@ -11,6 +12,7 @@ require_once('src/controllers/auth.php');
 use Application\Controllers\Comment\Add\AddComment;
 use Application\Controllers\Homepage\Homepage;
 use Application\Controllers\Post\Post;
+use Application\Controllers\Webcam\Webcam;
 use Application\Controllers\Login\Login;
 use Application\Controllers\Signup\Signup;
 use Application\Controllers\Profile\Profile;
@@ -149,6 +151,10 @@ try {
                 } else {
                     throw new Exception("Current user cannot be identified.");
                 }
+            }
+            // WEBCAM RELATED ROUTES
+            else if ($_GET['action'] === 'webcam') {
+                (new Webcam())->execute();
             }
             // UNDEFINED ROUTE
             else {

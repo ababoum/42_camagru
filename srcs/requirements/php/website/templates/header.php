@@ -21,7 +21,7 @@
                 Profile
             </a>
 
-            <a class="navbar-item">
+            <a class="navbar-item" href="index.php?action=webcam">
                 Take a picture
             </a>
 
@@ -30,7 +30,7 @@
                     Log out
                 </a>
             <?php else : ?>
-                <a class="navbar-item" href="index.php">
+                <a class="navbar-item" href="index.php?action=login">
                     Log in
                 </a>
             <?php endif; ?>

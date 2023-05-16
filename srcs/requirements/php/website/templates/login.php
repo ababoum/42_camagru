@@ -1,7 +1,7 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-1">Log in</h1>
+<h1 class="title is-2">Log in</h1>
 <p class="subtitle">You need to be logged in to get access to Camagru</p>
 
 <!-- NOTIFICATION -->

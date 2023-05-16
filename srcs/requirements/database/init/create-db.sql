@@ -27,6 +27,21 @@ CREATE TABLE password_resets (
   creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TABLE IF EXISTS stickers;
+CREATE TABLE stickers (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  title varchar(255) NOT NULL DEFAULT '',
+  image_path varchar(255) NOT NULL DEFAULT '',
+  creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- POPULATE STICKERS TABLE
+INSERT INTO stickers (title, image_path) VALUES
+('bunny', 'uploads/stickers/bunny.png'),
+('mask', 'uploads/stickers/mask.png'),
+('star', 'uploads/stickers/star.png'),
+('cat', 'uploads/stickers/cat.png');
+
 DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,

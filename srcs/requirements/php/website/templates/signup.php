@@ -1,7 +1,7 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-1">Sign up</h1>
+<h1 class="title is-2">Sign up</h1>
 
 <form action="index.php?action=signup" method="post">
     <div>

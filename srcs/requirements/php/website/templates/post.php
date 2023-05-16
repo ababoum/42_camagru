@@ -1,7 +1,7 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-1 has-text-centered">Take a stylized picture with Camagru!</h1>
+<h1 class="title is-2 has-text-centered">Take a stylized picture with Camagru!</h1>
 
 <div class="box">
     <h3>

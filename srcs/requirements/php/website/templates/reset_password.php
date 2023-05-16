@@ -1,7 +1,7 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-1">Forgotten password?</h1>
+<h1 class="title is-2">Forgotten password?</h1>
 <p class="subtitle">Fill your email address to get a link to reset your password</p>
 
 <!-- ERROR NOTIFICATIONS -->

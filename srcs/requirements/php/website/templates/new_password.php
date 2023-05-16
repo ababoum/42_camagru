@@ -1,7 +1,7 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-1">Reset your password</h1>
+<h1 class="title is-2">Reset your password</h1>
 
 <!-- ERROR NOTIFICATIONS -->
 <?php if (isset($_SESSION['error'])) : ?>
