@@ -171,6 +171,27 @@ class UserRepository
         return $user;
     }
 
+    public function get_user_by_email(string $email): User
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            "SELECT id, username, email, active FROM users WHERE email = ?"
+        );
+        $statement->execute([$email]);
+        $row = $statement->fetch();
+
+        if ($row === false) {
+            return null;
+        }
+
+        $user = new User();
+        $user->id = $row['id'];
+        $user->username = $row['username'];
+        $user->email = $email;
+        $user->active = $row['active'];
+
+        return $user;
+    }
+
     public function find_unverified_user(string $email, string $activation_code)
     {
         $statement = $this->connection->getConnection()->prepare(

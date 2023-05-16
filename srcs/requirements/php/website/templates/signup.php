@@ -17,7 +17,7 @@
         <input class="input" type="password" id="password" name="password" placeholder="Password" />
     </div>
     <div>
-        <label for="password">Confirm password</label><br />
+        <label for="re_password">Confirm password</label><br />
         <input class="input" type="password" id="re_password" name="re_password" placeholder="Confirm password" />
     </div>
     <br>

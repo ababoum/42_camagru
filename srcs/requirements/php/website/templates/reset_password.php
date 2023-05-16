@@ -4,6 +4,14 @@
 <h1 class="title is-1">Forgotten password?</h1>
 <p class="subtitle">Fill your email address to get a link to reset your password</p>
 
+<!-- ERROR NOTIFICATIONS -->
+<?php if (isset($_SESSION['error'])) : ?>
+    <div class="notification is-danger">
+        <?= $_SESSION['error'] ?>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
 <form action="index.php?action=reset_password" method="post">
     <div>
         <label for="email">Email</label><br />

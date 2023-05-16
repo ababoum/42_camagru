@@ -20,34 +20,67 @@ session_start();
 try {
     // Routes availables for non logged in users
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+        // AN ACTION IS REQUESTED
         if (isset($_GET['action']) && $_GET['action'] !== '') {
-            // AN ACTION IS REQUESTED
-            if ($_GET['action'] === 'login') {
-                // Received login form data
-                $username = $_POST['username'] ?? "";
-                $password = $_POST['password'] ?? "";
+            // Received login form data
+            if ($_GET['action'] === 'login' && isset($_POST['username']) && isset($_POST['password'])) {
+                $username = $_POST['username'];
+                $password = $_POST['password'];
                 (new Login())->logIn($username, $password);
-            } elseif ($_GET['action'] === 'signup') {
+            }
+            // Request the login form
+            else if ($_GET['action'] === 'login') {
+                (new Login())->execute();
+            }
+            // Signup process
+            elseif ($_GET['action'] === 'signup') {
+                // Receive signup form data
                 if (
                     isset($_POST['username']) && isset($_POST['password'])
                     && isset($_POST['re_password']) && isset($_POST['email'])
                 ) {
-                    // Received signup form data
                     $username = $_POST['username'];
                     $password = $_POST['password'];
                     $re_password = $_POST['re_password'];
                     $email = $_POST['email'];
                     (new Signup())->signUp($username, $password, $re_password, $email);
-                } else {
+                }
+                // Empty signup form
+                else {
                     (new Signup())->execute();
                 }
             } else if ($_GET['action'] === 'reset_password') {
+                // Received reset password form data
                 if (isset($_POST['email'])) {
-                    // Received reset password form data
                     $email = $_POST['email'];
-                    (new Login())->sendPasswordLink($email);
-                } else {
-                    (new Login())->resetPassword();
+                    (new Login())->send_password_link($email);
+                }
+                // Request the empty email form
+                else {
+                    (new Login())->reset_password_email_form();
+                }
+            }
+            // New password within reset
+            else if ($_GET['action'] === 'new_password') {
+                // Received new password form data
+                if (isset($_POST['password']) && isset($_POST['re_password'])) {
+                    $password = $_POST['password'];
+                    $re_password = $_POST['re_password'];
+                    $email = $_SESSION['email'];
+                    $token = $_SESSION['token'];
+                    (new Login())->update_password($token, $email, $password, $re_password);
+                }
+                // Received reset password token (after opening the link in the email)
+                else if (isset($_GET['token']) && isset($_GET['email'])) {
+                    $token = $_GET['token'];
+                    $email = $_GET['email'];
+                    (new Login())->reset_password($token, $email);
+                }
+                // Empty form for new password 
+                else if (isset($_SESSION['email']) && isset($_SESSION['token'])) {
+                    $email = $_SESSION['email'];
+                    $token = $_SESSION['token'];
+                    (new Login())->new_password_form($token, $email);
                 }
             } else {
                 throw new Exception("The page requested doesn't exist, or you need to be <b>logged in</b> to access it.");
