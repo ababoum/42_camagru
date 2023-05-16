@@ -12,17 +12,17 @@ use Application\Model\Post\PostRepository;
 
 class Post
 {
-    public function execute(string $identifier)
+    public function execute(string $id)
     {
         $connection = new DatabaseConnection();
 
         $postRepository = new PostRepository();
         $postRepository->connection = $connection;
-        $post = $postRepository->getPost($identifier);
+        $post = $postRepository->getPost($id);
 
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;
-        $comments = $commentRepository->getComments($identifier);
+        $comments = $commentRepository->getComments($id);
 
         require('templates/post.php');
     }

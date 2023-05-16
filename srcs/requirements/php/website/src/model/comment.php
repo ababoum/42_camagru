@@ -8,7 +8,7 @@ use Application\Lib\Database\DatabaseConnection;
 
 class Comment
 {
-    public string $identifier;
+    public string $id;
     public string $author;
     public string $creationDate;
     public string $comment;
@@ -29,7 +29,7 @@ class CommentRepository
         $comments = [];
         while (($row = $statement->fetch())) {
             $comment = new Comment();
-            $comment->identifier = $row['id'];
+            $comment->id = $row['id'];
             $comment->author = $row['author'];
             $comment->creationDate = $row['creation_date'];
             $comment->comment = $row['comment'];
@@ -41,12 +41,12 @@ class CommentRepository
         return $comments;
     }
 
-    public function getComment(string $identifier): ?Comment
+    public function getComment(string $id): ?Comment
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT c.id, u.username AS author, comment, DATE_FORMAT(creation_date, '%d/%M/%Y at %Hh%imin%ss') AS creation_date, post_id FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = ?"
         );
-        $statement->execute([$identifier]);
+        $statement->execute([$id]);
 
         $row = $statement->fetch();
         if ($row === false) {
@@ -54,7 +54,7 @@ class CommentRepository
         }
 
         $comment = new Comment();
-        $comment->identifier = $row['id'];
+        $comment->id = $row['id'];
         $comment->author = $row['author'];
         $comment->creationDate = $row['creation_date'];
         $comment->comment = $row['comment'];

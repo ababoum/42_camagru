@@ -17,7 +17,7 @@ foreach ($posts as $post) {
         <p>
             <img src="<?= $post->image_path; ?>" alt="Picture taken on <?= $post->creationDate; ?>" />
             <br />
-            <em><a href="index.php?action=post&id=<?= urlencode($post->identifier) ?>">Comments</a></em>
+            <em><a href="index.php?action=post&id=<?= urlencode($post->id) ?>">Comments</a></em>
         </p>
     </div>
     <?php

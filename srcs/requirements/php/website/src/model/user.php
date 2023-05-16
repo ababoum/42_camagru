@@ -3,15 +3,15 @@
 namespace Application\Model\User;
 
 require_once('src/lib/database.php');
-require_once('src/lib/auth.php');
+require_once('src/lib/authtools.php');
 
 use Application\Lib\Database\DatabaseConnection;
-use Application\Lib\Auth\Auth;
+use Application\Lib\AuthTools\AuthTools;
 
 class User
 {
     public string $username;
-    public string $identifier;
+    public string $id;
     public string $email;
     public bool $active;
 }
@@ -58,7 +58,7 @@ class UserRepository
         }
 
         $user = new User();
-        $user->identifier = $row['id'];
+        $user->id = $row['id'];
         $user->username = $row['username'];
         $user->email = $row['email'];
         $user->active = $row['active'];
@@ -121,7 +121,7 @@ class UserRepository
         $password = password_hash($password, PASSWORD_DEFAULT);
 
         // Generate an activation code
-        $activation_code = Auth::generate_activation_code();
+        $activation_code = AuthTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
         $activation_expiry = date('Y-m-d H:i:s', strtotime('+1 day'));
 
@@ -138,11 +138,11 @@ class UserRepository
         }
 
         // Send an activation email
-        Auth::send_activation_email($email, $activation_code);
+        AuthTools::send_activation_email($email, $activation_code);
 
         // Prepare a user instance to log the user in
         $user = new User();
-        $user->identifier = $this->connection->getConnection()->lastInsertId();
+        $user->id = $this->connection->getConnection()->lastInsertId();
         $user->username = $username;
         $user->email = $email;
         $user->active = false;
@@ -163,7 +163,7 @@ class UserRepository
         }
 
         $user = new User();
-        $user->identifier = $id;
+        $user->id = $id;
         $user->username = $row['username'];
         $user->email = $row['email'];
         $user->active = $row['active'];

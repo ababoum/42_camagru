@@ -6,6 +6,7 @@ require_once('src/controllers/post.php');
 require_once('src/controllers/login.php');
 require_once('src/controllers/signup.php');
 require_once('src/controllers/profile.php');
+require_once('src/controllers/auth.php');
 
 use Application\Controllers\Comment\Add\AddComment;
 use Application\Controllers\Homepage\Homepage;
@@ -63,11 +64,11 @@ try {
             // POST RELATED ROUTES
             if ($_GET['action'] === 'post') {
                 if (isset($_GET['id']) && $_GET['id'] > 0) {
-                    $identifier = $_GET['id'];
+                    $id = $_GET['id'];
 
-                    (new Post())->execute($identifier);
+                    (new Post())->execute($id);
                 } else {
-                    throw new Exception('No image identifier sent');
+                    throw new Exception('No image id sent');
                 }
             }
             // USER RELATED ROUTES
@@ -77,17 +78,17 @@ try {
                 $email = $_POST['email'] ?? "";
                 $password = $_POST['password'] ?? "";
                 $re_password = $_POST['re_password'] ?? "";
-                $id = $_SESSION['identifier'] ?? "";
+                $id = $_SESSION['id'] ?? "";
                 (new Profile())->update_user($id, $username, $email, $password, $re_password);
             }
             // COMMENT RELATED ROUTES
             elseif ($_GET['action'] === 'addComment') {
                 if (isset($_GET['id']) && $_GET['id'] > 0) {
-                    $identifier = $_GET['id'];
+                    $id = $_GET['id'];
 
-                    (new AddComment())->execute($identifier, $_POST);
+                    (new AddComment())->execute($id, $_POST);
                 } else {
-                    throw new Exception('No image identifier sent');
+                    throw new Exception('No image id sent');
                 }
             }
             // LOGOUT RELATED ROUTES
@@ -107,6 +108,13 @@ try {
                     (new Auth())->activate_user($email, $code);
                 } else {
                     throw new Exception('No email or activation code sent.');
+                }
+            } else if ($_GET['action'] === 'resend_activation') {
+                if (isset($_SESSION['id'])) {
+                    $user_id = $_SESSION['id'];
+                    (new Auth())->resend_activation($user_id);
+                } else {
+                    throw new Exception("Current user cannot be identified.");
                 }
             }
             // UNDEFINED ROUTE

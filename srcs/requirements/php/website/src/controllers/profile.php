@@ -14,7 +14,7 @@ class Profile
     public function execute()
     {
         $user = new User();
-        $user->identifier = $_SESSION['identifier'];
+        $user->id = $_SESSION['id'];
         $user->username = $_SESSION['username'];
         $user->email = $_SESSION['email'];
         $user->active = $_SESSION['active'];
