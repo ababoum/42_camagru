@@ -1,8 +1,14 @@
 <?php $title = "Camagru"; ?>
 
 <?php ob_start(); ?>
-<h1 class="title is-2 has-text-centered">Take a stylized picture with Camagru!</h1>
 
+<section class="hero is-primary">
+    <div class="hero-body">
+        <p class="title has-text-centered">
+            Take a stylized picture with Camagru!
+        </p>
+    </div>
+</section>
 
 <section class="hero is-fullheight">
     <div class="hero-body">
@@ -13,17 +19,17 @@
                     <div class="box">
                         <div class="columns is-centered">
                             <div class="column is-half">
-                                <!-- Webcam preview container -->
-                                <div id="webcamPreviewContainer">
-                                    <video id="webcamPreviewVideo" width="100%" height="auto" autoplay playsinline></video>
-                                </div>
-                                <div class="field is-grouped is-grouped-centered">
-                                    <div class="control">
-                                        <button id="takeSnapshotButton" class="button is-primary">Take Snapshot</button>
-                                    </div>
-                                </div>
-                                <canvas id="snapshotCanvas" style="display: none;"></canvas>
+                        <!-- Webcam preview container -->
+                        <div id="webcamPreviewContainer">
+                            <video id="webcamPreviewVideo" width="100%" height="auto" autoplay playsinline></video>
+                        </div>
+                        <div class="field is-grouped is-grouped-centered">
+                            <div class="control">
+                                <button id="takeSnapshotButton" class="button is-primary">Take Snapshot</button>
                             </div>
+                        </div>
+                        <canvas id="snapshotCanvas" style="display: none;"></canvas>
+                    </div>
                         </div>
                     </div>
                     <!-- Snapshot Preview -->
@@ -41,23 +47,34 @@
                     </div>
                 </div>
                 <div class="column">
-                    <!-- Image Selection List -->
+                    <!-- Image Selection -->
                     <div class="box">
                         <form id="myForm" action="index.php?action=save_shot" method="POST" enctype="multipart/form-data">
-                            <div class="columns is-multiline">
-                                <!-- Image/Sticker Previews -->
-                                <?php foreach ($stickers as $sticker) { ?>
-                                    <div class="column is-one-third">
-                                        <div class="box">
-                                            <!-- Image/Sticker Preview -->
-                                            <img width="250" height="250" src="<?= $sticker->image_path; ?>" alt="<?= $sticker->title; ?>" class="image" onclick="selectImage('<?= $sticker->image_path; ?>')">
-                                        </div>
+                            <div class="field">
+                                <label class="label">Image Selection</label>
+                                <div class="control">
+                                    <div class="image-list">
+                                        <?php foreach ($stickers as $sticker) { ?>
+                                            <label class="radio image-item">
+                                                <div class="columns is-vcentered">
+                                                    <div class="column is-narrow">
+                                                        <input type="radio" name="selectedSticker" value="<?= $sticker->image_path ?>" required>
+                                                    </div>
+                                                    <div class="column">
+                                                        <img width="50" height="50" src="<?= $sticker->image_path; ?>" alt="<?= $sticker->title; ?>" class="image" onclick="selectImage('<?= $sticker->image_path; ?>')">
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        <?php } ?>
                                     </div>
-                                <?php } ?>
+                                </div>
                             </div>
-                            <input id="webcamImage" type="hidden" name="webcamImage">
-                            <input id="selectedImage" type="hidden" name="selectedImage">
-                            <button type="submit" class="button is-primary">Submit</button>
+                            <div class="field is-grouped is-grouped-centered">
+                                <div class="control">
+                                    <button type="submit" class="button is-primary">Submit</button>
+                                </div>
+                            </div>
+                            <input id="webcamImage" type="hidden" name="webcamImage" required>
                         </form>
                     </div>
                 </div>
@@ -65,6 +82,8 @@
         </div>
     </div>
 </section>
+
+
 
 <script>
     // JavaScript function to handle image selection

@@ -156,6 +156,15 @@ try {
             else if ($_GET['action'] === 'webcam') {
                 (new Webcam())->execute();
             }
+            else if ($_GET['action'] === 'save_shot') {
+                if (isset($_POST['webcamImage']) && isset($_POST['selectedSticker'])) {
+                    $img = $_POST['webcamImage'];
+                    $filter = $_POST['selectedSticker'];
+                    (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
+                } else {
+                    throw new Exception("No image or filter sent.");
+                }
+            }
             // UNDEFINED ROUTE
             else {
                 throw new Exception("The page requested doesn't exist.");

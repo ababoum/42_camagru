@@ -13,12 +13,12 @@ services:
     networks:
       - camagru_network
     # volumes:
-    #   - ./src:/var/www/html
+    #   - ./requirements/php/website:/var/www/html
     ports:
       - 8000:80
     depends_on:
       - database
-    restart: always
+    restart: unless-stopped
 
   #### MYSQL DATABASE ####
   database:
@@ -26,7 +26,7 @@ services:
     image: camagru-database:camagru
     build:
       context: requirements/database/
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     networks:
@@ -38,7 +38,7 @@ services:
     image: phpmyadmin/phpmyadmin
     ports:
         - '8080:80'
-    restart: always
+    restart: unless-stopped
     environment:
         PMA_HOST: mysql
     networks:

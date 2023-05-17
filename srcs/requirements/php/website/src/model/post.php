@@ -53,4 +53,12 @@ class PostRepository
 
         return $posts;
     }
+
+    public function savePost(string $image_path, $user_id): void
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            "INSERT INTO posts (user_id, image_path) VALUES (?, ?)"
+        );
+        $statement->execute([$user_id, $image_path]);
+    }
 }
