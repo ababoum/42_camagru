@@ -20,6 +20,12 @@ class Webcam
         $stickerRepository->connection = new DatabaseConnection();
         $stickers = $stickerRepository->getStickers();
 
+        // Prepare posts of current user
+        $postRepository = new PostRepository();
+        $postRepository->connection = new DatabaseConnection();
+
+        $posts = $postRepository->get_posts_by_user_id($_SESSION['user_id']);
+        
         require('templates/webcam.php');
     }
 
@@ -47,9 +53,9 @@ class Webcam
         if ( ImgTools::super_impose($img, $filter, $new_img_path) === false)
             throw new \Exception('Error while superimposing image');
 
-        $postRepository->savePost($new_img_path, $user_id);
+        $postRepository->save_post($new_img_path, $user_id);
 
         // Redirect to gallery
-        header('Location: index.php');
+        header('Location: index.php?action=webcam');
     }
 }

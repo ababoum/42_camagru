@@ -62,3 +62,13 @@ CREATE TABLE comments (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (post_id) REFERENCES posts(id)
 );
+
+DROP TABLE IF EXISTS likes;
+CREATE TABLE likes (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  post_id INT NOT NULL,
+  creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (post_id) REFERENCES posts(id)
+);

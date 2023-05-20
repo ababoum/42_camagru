@@ -77,6 +77,10 @@
                             <input id="webcamImage" type="hidden" name="webcamImage" required>
                         </form>
                     </div>
+                    <!-- PREVIEW OF POSTS -->
+                    <div class="box">
+                        <!-- TO DO -->
+                    </div>
                 </div>
             </div>
         </div>
