@@ -25,17 +25,31 @@ class Webcam
 
     public function save_shot($img, $filter, $user_id)
     {
+        // Check images extension
+        $img = base64_decode($img);
+        if ($img === false)
+            throw new \Exception('Error while decoding image (snapshot)');
+        $img = imagecreatefromstring($img);
+        if ($img === false)
+            throw new \Exception('Error while creating image from string (snapshot)');
+
+        $filter = imagecreatefrompng($filter);
+        if ($filter === false)
+            throw new \Exception('Error while creating image from png (filter)');
+
         $postRepository = new PostRepository();
         $postRepository->connection = new DatabaseConnection();
 
-        $new_img = ImgTools::super_impose($img, $filter);
-
-        // Save image in uploads folder
-        $new_img = base64_decode($new_img);
+        // Superimpose images and save final image in uploads folder
         $new_img_name = uniqid() . '.png';
         $new_img_path = 'uploads/' . $new_img_name;
-        file_put_contents($new_img_path, $new_img);
+        
+        if ( ImgTools::super_impose($img, $filter, $new_img_path) === false)
+            throw new \Exception('Error while superimposing image');
 
         $postRepository->savePost($new_img_path, $user_id);
+
+        // Redirect to gallery
+        header('Location: index.php');
     }
 }

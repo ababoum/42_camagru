@@ -9,11 +9,19 @@
     </div>
 </section>
 
-<p>Last pictures taken:</p>
+<p style="margin: 15px;	">Last pictures taken:</p>
 
 <?php
+// Display message box if no posts are available
+if (empty($posts)) {
+?>
+    <div class="box has-text-centered">
+        <p>No posts available.</p>
+    </div>
+<?php
+}
 foreach ($posts as $post) {
-    ?>
+?>
     <div class="box">
         <h3 class="title is-3">
             <?= htmlspecialchars($post->title); ?>
@@ -27,7 +35,7 @@ foreach ($posts as $post) {
             <em><a href="index.php?action=post&id=<?= urlencode($post->id) ?>">Comments</a></em>
         </p>
     </div>
-    <?php
+<?php
 }
 ?>
 <?php $content = ob_get_clean(); ?>

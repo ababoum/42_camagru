@@ -158,7 +158,7 @@ try {
             }
             else if ($_GET['action'] === 'save_shot') {
                 if (isset($_POST['webcamImage']) && isset($_POST['selectedSticker'])) {
-                    $img = $_POST['webcamImage'];
+                    $img = str_replace('data:image/png;base64,', '', $_POST['webcamImage']);
                     $filter = $_POST['selectedSticker'];
                     (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
                 } else {

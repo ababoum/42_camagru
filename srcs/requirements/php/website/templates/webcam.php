@@ -127,6 +127,9 @@
             // Display the snapshot preview image
             snapshotPreviewImage.src = imageDataURL;
             snapshotPreviewImage.style.display = 'block';
+
+            // Console log the size of the snapshot (width and height in pixels)
+            console.log('Snapshot size: ' + canvas.width + 'x' + canvas.height);
         });
     });
 </script>
