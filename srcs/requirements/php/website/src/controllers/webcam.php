@@ -24,8 +24,8 @@ class Webcam
         $postRepository = new PostRepository();
         $postRepository->connection = new DatabaseConnection();
 
-        $posts = $postRepository->get_posts_by_user_id($_SESSION['user_id']);
-        
+        $posts = $postRepository->get_posts_by_user_id($_SESSION['id']);
+
         require('templates/webcam.php');
     }
 
@@ -35,6 +35,15 @@ class Webcam
         $img = base64_decode($img);
         if ($img === false)
             throw new \Exception('Error while decoding image (snapshot)');
+        // Check if the image is less than 5MB
+        if (strlen($img) > 5000000)
+            throw new \Exception('Image is too big (snapshot)');
+        // Check if the image is a valid image
+        $f = finfo_open();
+        $mime_type = finfo_buffer($f, $img, FILEINFO_MIME_TYPE);
+        if ($mime_type !== 'image/png')
+            throw new \Exception('Image is not a valid image (snapshot)');
+        // Generate a GD image
         $img = imagecreatefromstring($img);
         if ($img === false)
             throw new \Exception('Error while creating image from string (snapshot)');
@@ -49,8 +58,8 @@ class Webcam
         // Superimpose images and save final image in uploads folder
         $new_img_name = uniqid() . '.png';
         $new_img_path = 'uploads/' . $new_img_name;
-        
-        if ( ImgTools::super_impose($img, $filter, $new_img_path) === false)
+
+        if (ImgTools::super_impose($img, $filter, $new_img_path) === false)
             throw new \Exception('Error while superimposing image');
 
         $postRepository->save_post($new_img_path, $user_id);

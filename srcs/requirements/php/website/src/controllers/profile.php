@@ -18,6 +18,7 @@ class Profile
         $user->username = $_SESSION['username'];
         $user->email = $_SESSION['email'];
         $user->active = $_SESSION['active'];
+        $user->accept_notifications = $_SESSION['accept_notifications'];
 
         require('templates/profile.php');
     }
@@ -49,5 +50,21 @@ class Profile
         $_SESSION['info'] = 'User updated successfully.';
         
         header('Location: index.php?action=profile');
+    }
+
+    public function update_email_notifications(string $user_id, int $accept_notifications)
+    {
+        $userRepository = new UserRepository();
+        $userRepository->connection = new DatabaseConnection();
+
+        if ($accept_notifications !== 1 && $accept_notifications !== 0) {
+            throw new \Exception('Invalid value for email notifications.');
+        }
+        $userRepository->update_email_notifications($user_id, $accept_notifications);
+
+        $_SESSION['accept_notifications'] = $accept_notifications;
+
+        header('Location: index.php?action=profile');
+        
     }
 }

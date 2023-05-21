@@ -19,23 +19,31 @@
                     <div class="box">
                         <div class="columns is-centered">
                             <div class="column is-half">
-                        <!-- Webcam preview container -->
-                        <div id="webcamPreviewContainer">
-                            <video id="webcamPreviewVideo" width="100%" height="auto" autoplay playsinline></video>
-                        </div>
-                        <div class="field is-grouped is-grouped-centered">
-                            <div class="control">
-                                <button id="takeSnapshotButton" class="button is-primary">Take Snapshot</button>
+                                <!-- Webcam preview container -->
+                                <div id="webcamPreviewContainer" class="mb-1">
+                                    <video id="webcamPreviewVideo" width="100%" height="auto" autoplay playsinline></video>
+                                </div>
+                                <div class="columns is-centered is-vcentered">
+                                    <div class="column is-flex is-justify-content-center">
+                                        <button id="takeSnapshotButton" class="button is-primary">Take Snapshot</button>
+                                    </div>
+                                </div>
+                                <div class="columns is-centered is-vcentered">
+                                    <b class="has-text-centered">OR</b>
+                                </div>
+                                <div class="columns is-centered is-vcentered">
+                                    <div class="column is-flex is-justify-content-center">
+                                        <input type="file" id="imageUpload" accept="image/png" onchange="previewImage(event);updateImageInput(event)">
+                                    </div>
+                                </div>
+                                <canvas id="snapshotCanvas" style="display: none;"></canvas>
                             </div>
-                        </div>
-                        <canvas id="snapshotCanvas" style="display: none;"></canvas>
-                    </div>
                         </div>
                     </div>
                     <!-- Snapshot Preview -->
                     <div class="box">
                         <div id="snapshotPreviewContainer" class="has-text-centered">
-                            <h3 class="title is-5">Snapshot Preview</h3>
+                            <h3 class="title is-5 has-text-centered">Snapshot preview</h3>
                             <div class="columns is-centered">
                                 <div class="column is-half">
                                     <figure class="image is-4by3">
@@ -51,17 +59,17 @@
                     <div class="box">
                         <form id="myForm" action="index.php?action=save_shot" method="POST" enctype="multipart/form-data">
                             <div class="field">
-                                <label class="label">Image Selection</label>
+                                <h3 class="title is-5 has-text-centered">Sticker selection</h3>
                                 <div class="control">
                                     <div class="image-list">
                                         <?php foreach ($stickers as $sticker) { ?>
-                                            <label class="radio image-item">
+                                            <label class="radio image-item" onclick="enableSubmit()">
                                                 <div class="columns is-vcentered">
                                                     <div class="column is-narrow">
                                                         <input type="radio" name="selectedSticker" value="<?= $sticker->image_path ?>" required>
                                                     </div>
                                                     <div class="column">
-                                                        <img width="50" height="50" src="<?= $sticker->image_path; ?>" alt="<?= $sticker->title; ?>" class="image" onclick="selectImage('<?= $sticker->image_path; ?>')">
+                                                        <img width="50" height="50" src="<?= $sticker->image_path; ?>" alt="<?= $sticker->title; ?>" class="image">
                                                     </div>
                                                 </div>
                                             </label>
@@ -71,7 +79,7 @@
                             </div>
                             <div class="field is-grouped is-grouped-centered">
                                 <div class="control">
-                                    <button type="submit" class="button is-primary">Submit</button>
+                                    <button type="submit" class="button is-primary" id="submitButton" disabled>Submit</button>
                                 </div>
                             </div>
                             <input id="webcamImage" type="hidden" name="webcamImage" required>
@@ -79,7 +87,22 @@
                     </div>
                     <!-- PREVIEW OF POSTS -->
                     <div class="box">
-                        <!-- TO DO -->
+                        <h3 class="title is-5 has-text-centered">Last pictures taken</h3>
+                        <?php if (empty($posts)) { ?>
+                            <p class="has-text-centered">No posts available.</p>
+                        <?php } ?>
+                        <?php foreach ($posts as $post) { ?>
+                            <div class="box is-flex is-justify-content-center">
+                                <div class="columns is-vcentered">
+                                    <div class="column">
+                                        <img src="<?= $post->image_path; ?>" alt="<?= $post->title; ?>" width="100" height="auto" />
+                                    </div>
+                                    <div class="column">
+                                        <button class="button is-danger" onclick="window.location.href='index.php?action=delete_post&id=<?= $post->id; ?>&source=cam'">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
                     </div>
                 </div>
             </div>
@@ -88,15 +111,12 @@
 </section>
 
 
-
 <script>
-    // JavaScript function to handle image selection
-    function selectImage(imageUrl) {
-        // Set the selected image value in the form input
-        document.getElementById('selectedImage').value = imageUrl;
+    function enableSubmit() {
+        document.getElementById('submitButton').disabled = false;
     }
 
-    // JavaScript function to handle webcam preview and snapshot
+    // Handle webcam preview and snapshot
     document.addEventListener('DOMContentLoaded', function() {
         var video = document.getElementById('webcamPreviewVideo');
         var canvas = document.getElementById('snapshotCanvas');
@@ -136,6 +156,35 @@
             console.log('Snapshot size: ' + canvas.width + 'x' + canvas.height);
         });
     });
+
+    // Handle preview fir uploaded images
+    function previewImage(event) {
+        const input = event.target;
+        const snapshotPreviewImage = document.getElementById('snapshotPreviewImage');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                snapshotPreviewImage.src = e.target.result;
+                snapshotPreviewImage.style.display = 'block';
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Handle update of image input
+    function updateImageInput(event) {
+        const fileInput = event.target;
+        const file = fileInput.files[0];
+
+        const reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('webcamImage').value = reader.result;
+        };
+        reader.readAsDataURL(file);
+    }
 </script>
 
 

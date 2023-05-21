@@ -14,6 +14,7 @@ class User
     public string $id;
     public string $email;
     public bool $active;
+    public bool $accept_notifications;
 }
 
 class UserRepository
@@ -43,7 +44,9 @@ class UserRepository
         }
 
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, password, active FROM users WHERE username = ?"
+            "SELECT id, username, email, password, active, accept_notifications
+            FROM users
+            WHERE username = ?"
         );
         $statement->execute([$username]);
         $row = $statement->fetch();
@@ -62,6 +65,7 @@ class UserRepository
         $user->username = $row['username'];
         $user->email = $row['email'];
         $user->active = $row['active'];
+        $user->accept_notifications = $row['accept_notifications'];
 
         return $user;
     }
@@ -146,6 +150,7 @@ class UserRepository
         $user->username = $username;
         $user->email = $email;
         $user->active = false;
+        $user->accept_notifications = true;
 
         return $user;
     }
@@ -153,7 +158,9 @@ class UserRepository
     public function get_user_by_id(string $id): User
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT username, email, active FROM users WHERE id = ?"
+            "SELECT username, email, active, accept_notifications
+            FROM users
+            WHERE id = ?"
         );
         $statement->execute([$id]);
         $row = $statement->fetch();
@@ -167,6 +174,7 @@ class UserRepository
         $user->username = $row['username'];
         $user->email = $row['email'];
         $user->active = $row['active'];
+        $user->accept_notifications = $row['accept_notifications'];
 
         return $user;
     }
@@ -174,7 +182,8 @@ class UserRepository
     public function get_user_by_email(string $email): User
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, active FROM users WHERE email = ?"
+            "SELECT id, username, email, active, accept_notifications
+            FROM users WHERE email = ?"
         );
         $statement->execute([$email]);
         $row = $statement->fetch();
@@ -188,6 +197,7 @@ class UserRepository
         $user->username = $row['username'];
         $user->email = $email;
         $user->active = $row['active'];
+        $user->accept_notifications = $row['accept_notifications'];
 
         return $user;
     }
@@ -328,5 +338,19 @@ class UserRepository
         if ($statement->rowCount() === 0) {
             throw new \Exception('Something went wrong. Please try again.');
         }
+    }
+
+    public function update_email_notifications(string $user_id, int $accept_notifications): bool
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            "UPDATE users SET accept_notifications = ? WHERE id = ?"
+        );
+        $statement->execute([$accept_notifications, $user_id]);
+
+        if ($statement->rowCount() === 0) {
+            throw new \Exception('Something went wrong. Please try again.');
+        }
+
+        return $accept_notifications;
     }
 }

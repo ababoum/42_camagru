@@ -116,6 +116,15 @@ try {
                 $id = $_SESSION['id'] ?? "";
                 (new Profile())->update_user($id, $username, $email, $password, $re_password);
             }
+            else if ($_GET['action'] === 'update_email_notifications') {
+                if (isset($_GET['value'])) {
+                    $value = $_GET['value'];
+                    $user_id = $_SESSION['id'];
+                    (new Profile())->update_email_notifications($user_id, $value);
+                } else {
+                    throw new Exception('No value sent');
+                }
+            }
             // COMMENT RELATED ROUTES
             elseif ($_GET['action'] === 'addComment') {
                 if (isset($_GET['id']) && $_GET['id'] > 0) {
@@ -163,6 +172,18 @@ try {
                     (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
                 } else {
                     throw new Exception("No image or filter sent.");
+                }
+            }
+            // POSTS RELATED ROUTES
+            else if ($_GET['action'] === 'delete_post') {
+                if (isset($_GET['id']) && isset($_GET['source'])) {
+                    if ($_GET['source'] === 'cam') {
+                        $source = 'cam';
+                    } else if ($_GET['source'] === 'home') {
+                        $source = 'home';
+                    }
+                    $post_id = $_GET['id'];
+                    (new Post())->delete_post($post_id, $source);
                 }
             }
             // UNDEFINED ROUTE

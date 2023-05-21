@@ -118,6 +118,7 @@ class Login
         $_SESSION['id'] = $user->id;
         $_SESSION['email'] = $user->email;
         $_SESSION['active'] = $user->active;
+        $_SESSION['accept_notifications'] = $user->accept_notifications;
 
         header('Location: index.php');
     }

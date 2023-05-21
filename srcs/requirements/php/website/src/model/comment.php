@@ -19,7 +19,7 @@ class CommentRepository
 {
     public DatabaseConnection $connection;
 
-    public function getComments(string $post): array
+    public function get_comments(string $post): array
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT c.id, u.username AS author, comment, DATE_FORMAT(creation_date, '%d/%M/%Y at %Hh%imin%ss') AS creation_date, post_id FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE post_id = ? ORDER BY creation_date DESC"
@@ -41,7 +41,7 @@ class CommentRepository
         return $comments;
     }
 
-    public function getComment(string $id): ?Comment
+    public function get_comment(string $id): ?Comment
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT c.id, u.username AS author, comment, DATE_FORMAT(creation_date, '%d/%M/%Y at %Hh%imin%ss') AS creation_date, post_id FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = ?"
@@ -63,7 +63,7 @@ class CommentRepository
         return $comment;
     }
 
-    public function createComment(string $post, string $author, string $comment): bool
+    public function create_comment(string $post, string $author, string $comment): bool
     {
         $statement = $this->connection->getConnection()->prepare(
             'INSERT INTO comments(post_id, author, comment, comment_date) VALUES(?, ?, ?, NOW())'
@@ -71,5 +71,13 @@ class CommentRepository
         $affectedLines = $statement->execute([$post, $author, $comment]);
 
         return ($affectedLines > 0);
+    }
+
+    public function delete_comments(string $post_id): void
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            'DELETE FROM comments WHERE post_id = ?'
+        );
+        $statement->execute([$post_id]);
     }
 }

@@ -29,6 +29,7 @@ class Signup
         $_SESSION['id'] = $user->id;
         $_SESSION['email'] = $user->email;
         $_SESSION['active'] = $user->active;
+        $_SESSION['accept_notifications'] = $user->accept_notifications;
 
         $_SESSION['info'] = 'Your account has been created successfully! You are now logged in.
         <b>You still need to verify your email address. Please check your inbox.</b>';
