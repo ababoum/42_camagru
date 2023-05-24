@@ -35,7 +35,7 @@ class Post
 
         $postRepository = new PostRepository();
         $postRepository->connection = $connection;
-        $postRepository->delete_post($post_id, $source);
+        $postRepository->delete_post($post_id);
 
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Lib\AuthTools;
+namespace Application\Lib\MailingTools;
 
 require 'mailer/src/Exception.php';
 require 'mailer/src/PHPMailer.php';
@@ -9,7 +9,7 @@ require 'mailer/src/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class AuthTools
+class MailingTools
 {
     public static function generate_activation_code(): string
     {
@@ -97,5 +97,44 @@ class AuthTools
         } catch (Exception $e) {
             throw new \Exception('Failed to send email: ' . $mail->ErrorInfo);
         }
+    }
+
+    public static function notify_post_author(string $email, string $username, string $post_id): bool
+    {
+        // Create a new PHPMailer instance
+        $mail = new PHPMailer(true);
+
+        try {
+            // Configure SMTP settings
+            $mail->isSMTP();
+            $mail->Host = getenv('SMTP_HOST');
+            $mail->Port = getenv('SMTP_PORT');
+            $mail->SMTPAuth = true;
+            $mail->SMTPSecure = 'tls';
+            $mail->Username = getenv('SENDER_EMAIL_ADDRESS');
+            $mail->Password = getenv('SENDER_EMAIL_PASSWORD');
+
+            // create the activation link
+            $appUrl = getenv("APP_URL");
+            $post_link = $appUrl . "/index.php?action=post&id=$post_id";
+
+            // Set email content and details
+            $mail->setFrom(getenv('SENDER_EMAIL_ADDRESS'), 'Camagru');
+            $mail->addAddress($email);
+            $mail->Subject = 'Camagru >> New comment on your post';
+            $mail->Body = <<<MESSAGE
+                Hi $username,
+
+                Someone commented on your post. Click on the following link to see it:
+
+                $post_link
+                MESSAGE;
+
+            // Send the email
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            throw new \Exception('Failed to send email: ' . $mail->ErrorInfo);
+        }   
     }
 }

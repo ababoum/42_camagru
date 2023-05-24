@@ -14,26 +14,22 @@
     <h3>
         <?= htmlspecialchars($post->title) ?>
     </h3>
-    <em>on
-        <?= $post->creationDate ?>
+    <em>Taken on
+        <?= $post->creation_date ?>
     </em>
     <br>
-    <img src="<?= $post->image_path ?>" alt="Picture taken on <?= $post->creationDate ?>" />
+    <img src="<?= $post->image_path ?>" alt="Picture taken on <?= $post->creation_date ?>" />
 </div>
 
-<h2>Comments</h2>
+<h2 class="title is-3">Comments</h2>
 
-<form action="index.php?action=addComment&id=<?= $post->id ?>" method="post">
+<form action="index.php?action=add_comment&post_id=<?= $post->id ?>" method="post">
     <div>
-        <label for="author">Author</label><br />
-        <input type="text" id="author" name="author" />
+        <label class="label" for="comment">New comment</label><br />
+        <textarea class="textarea" id="comment" name="comment"></textarea>
     </div>
     <div>
-        <label for="comment">Comment</label><br />
-        <textarea id="comment" name="comment"></textarea>
-    </div>
-    <div>
-        <input value="Send" type="submit" />
+        <input class="button is-link is-light" value="Send" type="submit" />
     </div>
 </form>
 
@@ -43,11 +39,20 @@ foreach ($comments as $comment) {
     <p><strong>
             <?= htmlspecialchars($comment->author) ?>
         </strong> on
-        <?= $comment->creationDate ?>
+        <?= $comment->creation_date ?>
     </p>
-    <p>
-        <?= nl2br(htmlspecialchars($comment->comment)) ?>
-    </p>
+    <?php
+    if ($comment->author_id === $current_user_id) {
+        ?>
+        <a href="index.php?action=delete_comment&id=<?= $comment->id ?>&post_id=<?= $post->id ?>">Delete</a>
+        <?php
+    }
+    ?>
+    <div class="content">
+        <blockquote>
+            <?= nl2br(htmlspecialchars($comment->comment)) ?>
+        </blockquote>
+    </div>
     <?php
 }
 ?>

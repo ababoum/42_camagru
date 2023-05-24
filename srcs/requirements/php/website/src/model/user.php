@@ -3,10 +3,10 @@
 namespace Application\Model\User;
 
 require_once('src/lib/database.php');
-require_once('src/lib/authtools.php');
+require_once('src/lib/mailingtools.php');
 
 use Application\Lib\Database\DatabaseConnection;
-use Application\Lib\AuthTools\AuthTools;
+use Application\Lib\MailingTools\MailingTools;
 
 class User
 {
@@ -125,7 +125,7 @@ class UserRepository
         $password = password_hash($password, PASSWORD_DEFAULT);
 
         // Generate an activation code
-        $activation_code = AuthTools::generate_activation_code();
+        $activation_code = MailingTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
         $activation_expiration = date('Y-m-d H:i:s', strtotime('+1 day'));
 
@@ -142,7 +142,7 @@ class UserRepository
         }
 
         // Send an activation email
-        AuthTools::send_activation_email($email, $activation_code);
+        MailingTools::send_activation_email($email, $activation_code);
 
         // Prepare a user instance to log the user in
         $user = new User();

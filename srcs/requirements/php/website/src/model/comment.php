@@ -9,31 +9,39 @@ use Application\Lib\Database\DatabaseConnection;
 class Comment
 {
     public string $id;
+    public string $author_id;
     public string $author;
-    public string $creationDate;
+    public string $creation_date;
     public string $comment;
-    public string $post;
+    public string $post_id;
 }
 
 class CommentRepository
 {
     public DatabaseConnection $connection;
 
-    public function get_comments(string $post): array
+    public function get_comments(string $post_id): array
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT c.id, u.username AS author, comment, DATE_FORMAT(creation_date, '%d/%M/%Y at %Hh%imin%ss') AS creation_date, post_id FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE post_id = ? ORDER BY creation_date DESC"
+            "SELECT c.id, u.username AS author, c.user_id, comment,
+                DATE_FORMAT(c.creation_date, '%d-%M-%Y at %Hh%imin%ss') AS creation_date,
+                post_id
+            FROM comments c
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE post_id = ?
+            ORDER BY creation_date DESC"
         );
-        $statement->execute([$post]);
+        $statement->execute([$post_id]);
 
         $comments = [];
         while (($row = $statement->fetch())) {
             $comment = new Comment();
             $comment->id = $row['id'];
+            $comment->author_id = $row['user_id'];
             $comment->author = $row['author'];
-            $comment->creationDate = $row['creation_date'];
+            $comment->post_id = $row['post_id'];
+            $comment->creation_date = $row['creation_date'];
             $comment->comment = $row['comment'];
-            $comment->post = $row['post_id'];
 
             $comments[] = $comment;
         }
@@ -41,36 +49,60 @@ class CommentRepository
         return $comments;
     }
 
-    public function get_comment(string $id): ?Comment
+    public function get_comment(string $comment_id): Comment
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT c.id, u.username AS author, comment, DATE_FORMAT(creation_date, '%d/%M/%Y at %Hh%imin%ss') AS creation_date, post_id FROM comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = ?"
+            "SELECT c.id, c.user_id, c.post_id, c.comment,
+                u.username AS author,
+                DATE_FORMAT(c.creation_date, '%d-%M-%Y at %Hh%imin%ss') AS creation_date
+            FROM comments c
+            LEFT JOIN users u ON c.user_id = u.id
+            WHERE c.id = ?"
         );
-        $statement->execute([$id]);
+        $statement->execute([$comment_id]);
 
         $row = $statement->fetch();
-        if ($row === false) {
-            return null;
-        }
-
         $comment = new Comment();
         $comment->id = $row['id'];
+        $comment->author_id = $row['user_id'];
         $comment->author = $row['author'];
-        $comment->creationDate = $row['creation_date'];
+        $comment->post_id = $row['post_id'];
+        $comment->creation_date = $row['creation_date'];
         $comment->comment = $row['comment'];
-        $comment->post = $row['post_id'];
 
         return $comment;
     }
 
-    public function create_comment(string $post, string $author, string $comment): bool
+    public function get_post_author_id(string $post_id): string
     {
         $statement = $this->connection->getConnection()->prepare(
-            'INSERT INTO comments(post_id, author, comment, comment_date) VALUES(?, ?, ?, NOW())'
+            "SELECT user_id FROM posts WHERE id = ?"
         );
-        $affectedLines = $statement->execute([$post, $author, $comment]);
+        $statement->execute([$post_id]);
+
+        $row = $statement->fetch();
+        return $row['user_id'];
+    }
+
+    public function create_comment(string $post_id, string $author_id, string $comment): bool
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            'INSERT INTO comments(post_id, user_id, comment)
+            VALUES(?, ?, ?)'
+        );
+        $affectedLines = $statement->execute([$post_id, $author_id, $comment]);
 
         return ($affectedLines > 0);
+    }
+
+    public function delete_comment(string $comment_id): bool
+    {
+        $statement = $this->connection->getConnection()->prepare(
+            'DELETE FROM comments WHERE id = ?'
+        );
+        $statement->execute([$comment_id]);
+
+        return ($statement->rowCount() > 0);
     }
 
     public function delete_comments(string $post_id): void

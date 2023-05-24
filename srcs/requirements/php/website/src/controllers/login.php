@@ -5,7 +5,7 @@ namespace Application\Controllers\Login;
 require_once('src/lib/database.php');
 require_once('src/model/user.php');
 
-use Application\Lib\AuthTools\AuthTools;
+use Application\Lib\MailingTools\MailingTools;
 use Application\Lib\Database\DatabaseConnection;
 use Application\Model\User\UserRepository;
 
@@ -136,7 +136,7 @@ class Login
             exit();
         }
 
-        $token = AuthTools::generate_password_token();
+        $token = MailingTools::generate_password_token();
         $hashed_token = password_hash($token, PASSWORD_DEFAULT);
 
         // Delete any existing tokens for this email/user
@@ -161,7 +161,7 @@ class Login
         }
 
         // Send the email
-        AuthTools::send_forgotten_password_email($email, $token);
+        MailingTools::send_forgotten_password_email($email, $token);
 
         $_SESSION['info'] = 'A link to reset your password has been sent to your email address.';
         header('Location: index.php');

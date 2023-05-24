@@ -15,8 +15,8 @@ class ImgTools
         $webcamHeight = imagesy($webcamImageResource);
 
         // Calculate the desired dimensions for the resized sticker image
-        $resizedWidth = intval(imagesx($webcamImageResource) * 0.1);
-        $resizedHeight = intval(imagesy($webcamImageResource) * 0.1);
+        $resizedWidth = intval(imagesx($webcamImageResource) * 0.25);
+        $resizedHeight = intval(imagesy($webcamImageResource) * 0.25);
         $resizedDim = max($resizedWidth, $resizedHeight);
 
         // Resize the sticker image

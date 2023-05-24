@@ -4,10 +4,10 @@ namespace Application\Controllers\Auth;
 
 require_once('src/lib/database.php');
 require_once('src/model/user.php');
-require_once('src/lib/authtools.php');
+require_once('src/lib/mailingtools.php');
 
 use Application\Lib\Database\DatabaseConnection;
-use Application\Lib\AuthTools\AuthTools;
+use Application\Lib\MailingTools\MailingTools;
 use Application\Model\User\UserRepository;
 
 class Auth
@@ -44,7 +44,7 @@ class Auth
         }
 
         // Generate an activation code
-        $activation_code = AuthTools::generate_activation_code();
+        $activation_code = MailingTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
         $activation_expiration = date('Y-m-d H:i:s', strtotime('+1 day'));
 
@@ -59,7 +59,7 @@ class Auth
             throw new \Exception("Something went wrong. Try again later.");
         }
 
-        if (!AuthTools::send_activation_email($user->email, $activation_code)) {
+        if (!MailingTools::send_activation_email($user->email, $activation_code)) {
             $_SESSION['error'] = 'Something went wrong. Try again later.';
         } else {
             $_SESSION['info'] = 'Activation email sent.';

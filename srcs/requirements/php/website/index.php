@@ -1,19 +1,19 @@
 <?php
 
-require_once('src/controllers/comment/add.php');
 require_once('src/controllers/homepage.php');
 require_once('src/controllers/gallery.php');
 require_once('src/controllers/post.php');
+require_once('src/controllers/comment.php');
 require_once('src/controllers/webcam.php');
 require_once('src/controllers/login.php');
 require_once('src/controllers/signup.php');
 require_once('src/controllers/profile.php');
 require_once('src/controllers/auth.php');
 
-use Application\Controllers\Comment\Add\AddComment;
 use Application\Controllers\Homepage\Homepage;
 use Application\Controllers\Gallery\Gallery;
 use Application\Controllers\Post\Post;
+use Application\Controllers\Comment\Comment;
 use Application\Controllers\Webcam\Webcam;
 use Application\Controllers\Login\Login;
 use Application\Controllers\Signup\Signup;
@@ -82,9 +82,7 @@ try {
                 }
                 // Empty form for new password 
                 else if (isset($_SESSION['email']) && isset($_SESSION['token'])) {
-                    $email = $_SESSION['email'];
-                    $token = $_SESSION['token'];
-                    (new Login())->new_password_form($token, $email);
+                    (new Login())->new_password_form();
                 }
             } else {
                 throw new Exception("The page requested doesn't exist, or you need to be <b>logged in</b> to access it.");
@@ -125,8 +123,7 @@ try {
                     $page = $_GET['page'] ?? 1;
                     if (!isset($_GET['source'])) {
                         $source = 'gallery';
-                    }
-                    else if ($_GET['source'] === 'cam') {
+                    } else if ($_GET['source'] === 'cam') {
                         $source = 'cam';
                     } else if ($_GET['source'] === 'gallery') {
                         $source = 'gallery';
@@ -134,12 +131,11 @@ try {
                     $post_id = $_GET['id'];
                     (new Post())->delete_post($post_id, $source, $page);
                 }
-            }
-            else if ($_GET['action'] === 'unlike_post') {
+            } else if ($_GET['action'] === 'unlike_post') {
                 if (isset($_GET['id'])) {
                     $post_id = $_GET['id'];
                     $current_page = $_GET['page'] ?? 1;
-                    $current_page = (int)$current_page;
+                    $current_page = (int) $current_page;
                     if ($current_page <= 0) {
                         $current_page = 1;
                     }
@@ -147,18 +143,40 @@ try {
                 } else {
                     throw new Exception('No image id sent');
                 }
-            }
-            else if ($_GET['action'] === 'like_post') {
+            } else if ($_GET['action'] === 'like_post') {
                 if (isset($_GET['id'])) {
                     $post_id = $_GET['id'];
                     $current_page = $_GET['page'] ?? 1;
-                    $current_page = (int)$current_page;
+                    $current_page = (int) $current_page;
                     if ($current_page <= 0) {
                         $current_page = 1;
                     }
                     (new Post())->like_post($post_id, $_SESSION['id'], $current_page);
                 } else {
                     throw new Exception('No image id sent');
+                }
+            }
+            // COMMENT RELATED ROUTES
+            elseif ($_GET['action'] === 'add_comment') {
+                if (
+                    isset($_GET['post_id']) && $_GET['post_id'] > 0
+                    && isset($_POST['comment']) && !empty($_POST['comment'])
+                ) {
+                    $post_id = $_GET['post_id'];
+                    $user_id = $_SESSION['id'];
+                    $comment = $_POST['comment'];
+                    (new Comment())->add_comment($post_id, $user_id, $comment);
+                } else {
+                    throw new Exception('Invalid comment creation request.');
+                }
+            } else if ($_GET['action'] === 'delete_comment') {
+                if (isset($_GET['id'])) {
+                    $comment_id = $_GET['id'];
+                    $post_id = $_GET['post_id'] ?? 0;
+                    $user_id = $_SESSION['id'];
+                    (new Comment())->delete_comment($comment_id, $post_id, $user_id);
+                } else {
+                    throw new Exception('No comment id sent');
                 }
             }
             // USER RELATED ROUTES
@@ -177,16 +195,6 @@ try {
                     (new Profile())->update_email_notifications($user_id, $value);
                 } else {
                     throw new Exception('No value sent');
-                }
-            }
-            // COMMENT RELATED ROUTES
-            elseif ($_GET['action'] === 'addComment') {
-                if (isset($_GET['id']) && $_GET['id'] > 0) {
-                    $id = $_GET['id'];
-
-                    (new AddComment())->execute($id, $_POST);
-                } else {
-                    throw new Exception('No image id sent');
                 }
             }
             // LOGOUT RELATED ROUTES

@@ -28,7 +28,10 @@ class Gallery
 
         $nb_of_pages = ceil($nb_posts / 5);
 
-        if ($page > $nb_of_pages || $page < 1) {
+        if (
+            $nb_posts > 0 &&
+            ($page > $nb_of_pages || $page < 1)
+        ) {
             header('Location: index.php?action=gallery&page=1');
             exit();
         }

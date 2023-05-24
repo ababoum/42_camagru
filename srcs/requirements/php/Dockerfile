@@ -19,4 +19,7 @@ WORKDIR /var/www/html
 
 COPY website/ ./
 
+# Change owner of the website
+RUN chown -R www-data:www-data /var/www/html
+
 EXPOSE 80
