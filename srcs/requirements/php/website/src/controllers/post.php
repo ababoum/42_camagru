@@ -20,7 +20,7 @@ class Post
 
         $postRepository = new PostRepository();
         $postRepository->connection = $connection;
-        $post = $postRepository->get_post_by_id($id, $current_user_id);
+        $post = $postRepository->get_post_by_id($id);
 
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;

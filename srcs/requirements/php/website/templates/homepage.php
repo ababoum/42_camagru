@@ -9,6 +9,14 @@
     </div>
 </section>
 
+<!-- NOTIFICATIONS -->
+<?php if (isset($_SESSION['info'])) { ?>
+    <div class="notification is-info is-light has-text-centered">
+        <?= $_SESSION['info'] ?>
+    </div>
+    <?php unset($_SESSION['info']);
+} ?>
+
 <div class="columns is-vcentered">
     <div class="column is-half">
         <div class="content">

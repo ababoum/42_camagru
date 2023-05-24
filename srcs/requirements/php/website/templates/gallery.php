@@ -32,12 +32,13 @@ if (empty($posts)) {
                 <img src="<?= $post->image_path; ?>" alt="Picture taken on <?= $post->creation_date; ?>" width="400"
                     height="auto" />
                 <br />
-                <?php if ($post->does_current_user_like_post) { ?>
-                    <a href="index.php?action=unlike_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>">Unlike 👎 </a>
-                <?php } else { ?>
-                    <a href="index.php?action=like_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>">Like 👍 </a>
-                <?php } ?>
-                —
+                <?php if ($current_user_id) {
+                    if ($post->does_current_user_like_post) { ?>
+                        <a href="index.php?action=unlike_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>">Unlike 👎 —</a>
+                    <?php } else { ?>
+                        <a href="index.php?action=like_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>">Like 👍 —</a>
+                    <?php }
+                } ?>
                 <?php if ($post->nb_likes == 1) { ?>
                     <?= $post->nb_likes; ?> like
                 <?php } else { ?>

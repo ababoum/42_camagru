@@ -21,7 +21,7 @@ class PostRepository
 {
     public DatabaseConnection $connection;
 
-    public function get_post_by_id(string $id, $current_user_id): Post
+    public function get_post_by_id(string $id): Post
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT posts.id,
@@ -29,8 +29,7 @@ class PostRepository
                     posts.image_path,
                     posts.user_id AS author_id,
                     DATE_FORMAT(posts.creation_date, '%d %M %Y') AS creation_date,
-                    COUNT(likes.id) AS number_of_likes,
-                    COUNT(likes.id) > 0 AS user_likes_post
+                    COUNT(likes.id) AS number_of_likes
             FROM posts
             LEFT JOIN likes ON posts.id = likes.post_id
             WHERE posts.id = ?"
@@ -45,7 +44,7 @@ class PostRepository
         $post->id = $row['id'];
         $post->author_id = $row['author_id'];
         $post->nb_likes = $row['number_of_likes'];
-        $post->does_current_user_like_post = $row['user_likes_post'];
+        $post->does_current_user_like_post = false; // is not used in this context
 
         return $post;
     }

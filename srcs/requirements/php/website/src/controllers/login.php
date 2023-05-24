@@ -107,11 +107,17 @@ class Login
         exit();
     }
 
-    public function logIn(string $username, string $password)
+    public function log_in(string $username, string $password)
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
-        $user = $userRepository->log_user($username, $password);
+        try {
+            $user = $userRepository->log_user($username, $password);
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header('Location: index.php?action=login');
+            exit();
+        }
 
         $_SESSION['loggedin'] = true;
         $_SESSION['username'] = $user->username;

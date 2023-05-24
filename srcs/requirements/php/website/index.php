@@ -26,11 +26,35 @@ try {
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         // AN ACTION IS REQUESTED
         if (isset($_GET['action']) && $_GET['action'] !== '') {
+            // GALLERY RELATED ROUTES
+            if ($_GET['action'] === 'gallery') {
+                if (isset($_GET['page']) && $_GET['page'] > 0) {
+                    $page = $_GET['page'];
+                    (new Gallery())->execute_page($page, '');
+                } else if (isset($_GET['page']) && $_GET['page'] <= 0) {
+                    throw new Exception('Page number must be greater than 0');
+                } else {
+                    (new Gallery())->execute_page(1, ''); // page 1 by default
+                }
+            }
+            // POST RELATED ROUTES
+            else if ($_GET['action'] === 'post') {
+                if (isset($_GET['id']) && $_GET['id'] > 0) {
+                    $id = $_GET['id'];
+                    (new Post())->show($id, '');
+                } else {
+                    throw new Exception('No image id sent');
+                }
+            }
             // Received login form data
-            if ($_GET['action'] === 'login' && isset($_POST['username']) && isset($_POST['password'])) {
+            else if (
+                $_GET['action'] === 'login'
+                && isset($_POST['username'])
+                && isset($_POST['password'])
+            ) {
                 $username = $_POST['username'];
                 $password = $_POST['password'];
-                (new Login())->logIn($username, $password);
+                (new Login())->log_in($username, $password);
             }
             // Request the login form
             else if ($_GET['action'] === 'login') {
@@ -89,7 +113,7 @@ try {
             }
         } else {
             // NO ACTION IS REQUESTED
-            (new Login())->execute();
+            (new Homepage())->execute();
         }
     }
     // Routes availables for logged in users

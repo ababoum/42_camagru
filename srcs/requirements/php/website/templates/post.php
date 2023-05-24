@@ -23,15 +23,17 @@
 
 <h2 class="title is-3">Comments</h2>
 
-<form action="index.php?action=add_comment&post_id=<?= $post->id ?>" method="post">
-    <div>
-        <label class="label" for="comment">New comment</label><br />
-        <textarea class="textarea" id="comment" name="comment"></textarea>
-    </div>
-    <div>
-        <input class="button is-link is-light" value="Send" type="submit" />
-    </div>
-</form>
+<?php if ($current_user_id) { ?>
+    <form action="index.php?action=add_comment&post_id=<?= $post->id ?>" method="post">
+        <div>
+            <label class="label" for="comment">New comment</label><br />
+            <textarea class="textarea" id="comment" name="comment"></textarea>
+        </div>
+        <div>
+            <input class="button is-link is-light" value="Send" type="submit" />
+        </div>
+    </form>
+<?php } ?>
 
 <?php
 foreach ($comments as $comment) {

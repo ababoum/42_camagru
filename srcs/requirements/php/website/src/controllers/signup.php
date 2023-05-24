@@ -24,16 +24,10 @@ class Signup
         if ($user === false) {
             throw new \Exception('Impossible to create a new user!');
         }
-        $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $user->username;
-        $_SESSION['id'] = $user->id;
-        $_SESSION['email'] = $user->email;
-        $_SESSION['active'] = $user->active;
-        $_SESSION['accept_notifications'] = $user->accept_notifications;
 
-        $_SESSION['info'] = 'Your account has been created successfully! You are now logged in.
+        $_SESSION['info'] = 'Your account has been created successfully!
         <b>You still need to verify your email address. Please check your inbox.</b>';
 
-        header('Location: index.php');
+        header('Location: index.php?action=homepage');
     }
 }

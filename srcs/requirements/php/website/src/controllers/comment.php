@@ -14,30 +14,32 @@ use Application\Model\User\User;
 
 class Comment
 {
-    private function _notify_post_author(string $post_id)
-    {
-        $connection = new DatabaseConnection();
-        $userRepository = new UserRepository();
-        $userRepository->connection = $connection;
-
-        $commentRepository = new CommentRepository();
-        $commentRepository->connection = new DatabaseConnection();
-        $post_author_id = $commentRepository->get_post_author_id($post_id);
-        $user = $userRepository->get_user_by_id($post_author_id);
-
-        MailingTools::notify_post_author($user->email, $user->username, $post_id);
-    }
     public function add_comment(string $post_id, string $user_id, string $comment)
     {
+        $connection = new DatabaseConnection();
         $commentRepository = new CommentRepository();
-        $commentRepository->connection = new DatabaseConnection();
+        $userRepository = new UserRepository();
+        $commentRepository->connection = $connection;
+        $userRepository->connection = $connection;
+
         $success = $commentRepository->create_comment($post_id, $user_id, $comment);
+
+        $post_author_id = $commentRepository->get_post_author_id($post_id);
+        $user = $userRepository->get_user_by_id($post_author_id);
 
         if (!$success) {
             throw new \Exception('The comment cannot be added.');
         } else {
-            if ($user_id !== $commentRepository->get_post_author_id($post_id))
-                $this->_notify_post_author($post_id);
+            if (
+                $user_id !== $commentRepository->get_post_author_id($post_id)
+                && $user->accept_notifications
+            ) {
+                MailingTools::notify_post_author(
+                    $user->email,
+                    $user->username,
+                    $post_id
+                );
+            }
             header('Location: index.php?action=post&id=' . $post_id);
         }
     }

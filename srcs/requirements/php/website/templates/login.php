@@ -7,12 +7,22 @@
 <!-- NOTIFICATION -->
 <?php
 if (isset($_SESSION['info'])) {
-?>
+    ?>
     <div class="notification is-primary">
         <?= $_SESSION['info'] ?>
     </div>
+    <?php unset($_SESSION['info']);
+}
+?>
+
+<!-- ERRORS -->
 <?php
-    unset($_SESSION['info']);
+if (isset($_SESSION['error'])) {
+    ?>
+    <div class="notification is-danger">
+        <?= $_SESSION['error'] ?>
+    </div>
+    <?php unset($_SESSION['error']);
 }
 ?>
 
@@ -32,7 +42,8 @@ if (isset($_SESSION['info'])) {
     </div>
 </form>
 <div>
-<a href="index.php?action=reset_password">Forgotten password?</a> — Don't have an account? <a href="index.php?action=signup">Sign up</a>
+    <a href="index.php?action=reset_password">Forgotten password?</a> — Don't have an account? <a
+        href="index.php?action=signup">Sign up</a>
 </div>
 <?php $content = ob_get_clean(); ?>
 

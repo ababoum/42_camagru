@@ -60,6 +60,11 @@ class UserRepository
             throw new \Exception('Incorrect password.');
         }
 
+        // Check if user is verified
+        if ($row['active'] === '0') {
+            throw new \Exception('Please verify your email address.');
+        }
+
         $user = new User();
         $user->id = $row['id'];
         $user->username = $row['username'];
@@ -179,7 +184,7 @@ class UserRepository
         return $user;
     }
 
-    public function get_user_by_email(string $email): User
+    public function get_user_by_email(string $email): User | null
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT id, username, email, active, accept_notifications

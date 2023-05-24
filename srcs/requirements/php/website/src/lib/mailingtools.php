@@ -5,6 +5,7 @@ namespace Application\Lib\MailingTools;
 require 'mailer/src/Exception.php';
 require 'mailer/src/PHPMailer.php';
 require 'mailer/src/SMTP.php';
+require_once 'config/setup.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -29,19 +30,19 @@ class MailingTools
         try {
             // Configure SMTP settings
             $mail->isSMTP();
-            $mail->Host = getenv('SMTP_HOST');
-            $mail->Port = getenv('SMTP_PORT');
+            $mail->Host = SMTP_HOST;
+            $mail->Port = SMTP_PORT;
             $mail->SMTPAuth = true;
             $mail->SMTPSecure = 'tls';
-            $mail->Username = getenv('SENDER_EMAIL_ADDRESS');
-            $mail->Password = getenv('SENDER_EMAIL_PASSWORD');
+            $mail->Username = SENDER_EMAIL_ADDRESS;
+            $mail->Password = SENDER_EMAIL_PASSWORD;
 
             // create the activation link
-            $appUrl = getenv("APP_URL");
+            $appUrl = APP_URL;
             $activation_link = $appUrl . "/index.php?action=activate&email=$email&activation_code=$activation_code";
 
             // Set email content and details
-            $mail->setFrom(getenv('SENDER_EMAIL_ADDRESS'), 'Camagru');
+            $mail->setFrom(SENDER_EMAIL_ADDRESS, 'Camagru');
             $mail->addAddress($email);
             $mail->Subject = 'Camagru >> Please activate your account';
             $mail->Body = <<<MESSAGE
@@ -68,19 +69,19 @@ class MailingTools
         try {
             // Configure SMTP settings
             $mail->isSMTP();
-            $mail->Host = getenv('SMTP_HOST');
-            $mail->Port = getenv('SMTP_PORT');
+            $mail->Host = SMTP_HOST;
+            $mail->Port = SMTP_PORT;
             $mail->SMTPAuth = true;
             $mail->SMTPSecure = 'tls';
-            $mail->Username = getenv('SENDER_EMAIL_ADDRESS');
-            $mail->Password = getenv('SENDER_EMAIL_PASSWORD');
+            $mail->Username = SENDER_EMAIL_ADDRESS;
+            $mail->Password = SENDER_EMAIL_PASSWORD;
 
             // create the activation link
-            $appUrl = getenv("APP_URL");
+            $appUrl = APP_URL;
             $password_link = $appUrl . "/index.php?action=new_password&email=$email&token=$token";
 
             // Set email content and details
-            $mail->setFrom(getenv('SENDER_EMAIL_ADDRESS'), 'Camagru');
+            $mail->setFrom(SENDER_EMAIL_ADDRESS, 'Camagru');
             $mail->addAddress($email);
             $mail->Subject = 'Camagru >> Reset your password';
             $mail->Body = <<<MESSAGE
@@ -107,19 +108,19 @@ class MailingTools
         try {
             // Configure SMTP settings
             $mail->isSMTP();
-            $mail->Host = getenv('SMTP_HOST');
-            $mail->Port = getenv('SMTP_PORT');
+            $mail->Host = SMTP_HOST;
+            $mail->Port = SMTP_PORT;
             $mail->SMTPAuth = true;
             $mail->SMTPSecure = 'tls';
-            $mail->Username = getenv('SENDER_EMAIL_ADDRESS');
-            $mail->Password = getenv('SENDER_EMAIL_PASSWORD');
+            $mail->Username = SENDER_EMAIL_ADDRESS;
+            $mail->Password = SENDER_EMAIL_PASSWORD;
 
             // create the activation link
-            $appUrl = getenv("APP_URL");
+            $appUrl = APP_URL;
             $post_link = $appUrl . "/index.php?action=post&id=$post_id";
 
             // Set email content and details
-            $mail->setFrom(getenv('SENDER_EMAIL_ADDRESS'), 'Camagru');
+            $mail->setFrom(SENDER_EMAIL_ADDRESS, 'Camagru');
             $mail->addAddress($email);
             $mail->Subject = 'Camagru >> New comment on your post';
             $mail->Body = <<<MESSAGE

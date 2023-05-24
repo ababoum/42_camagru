@@ -1,3 +1,9 @@
+# TO DO
+
+* Gallery is public, but only a logged user can like and comment photos.
+
+# DONE
+
 * Allow user to upload an image instead of using the camera ✔️
     * In this case, the uploaded image should be tested for size, extension, and validity ✔️
 * Add likes for posts. ✔️
