@@ -14,13 +14,13 @@ use Application\Model\Like\LikeRepository;
 
 class Post
 {
-    public function execute(string $id): void
+    public function show(string $id, string $current_user_id): void
     {
         $connection = new DatabaseConnection();
 
         $postRepository = new PostRepository();
         $postRepository->connection = $connection;
-        $post = $postRepository->get_post_by_id($id);
+        $post = $postRepository->get_post_by_id($id, $current_user_id);
 
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;
@@ -29,7 +29,7 @@ class Post
         require('templates/post.php');
     }
 
-    public function delete_post(string $post_id, string $source): void
+    public function delete_post(string $post_id, string $source, int $page = 1): void
     {
         $connection = new DatabaseConnection();
 
@@ -48,7 +48,29 @@ class Post
         if ($source == 'cam') {
             header('Location: index.php?action=webcam');
         } else {
-            header('Location: index.php');
+            header('Location: index.php?action=gallery&page=' . $page);
         }
+    }
+
+    public function like_post(string $post_id, string $liker_id, int $current_page): void
+    {
+        $connection = new DatabaseConnection();
+
+        $likeRepository = new LikeRepository();
+        $likeRepository->connection = $connection;
+        $likeRepository->like_post($post_id, $liker_id);
+
+        header('Location: index.php?action=gallery&page=' . $current_page);        
+    }
+
+    public function unlike_post(string $post_id, string $liker_id, int $current_page): void
+    {
+        $connection = new DatabaseConnection();
+
+        $likeRepository = new LikeRepository();
+        $likeRepository->connection = $connection;
+        $likeRepository->unlike_post($post_id, $liker_id);
+
+        header('Location: index.php?action=gallery&page=' . $current_page);        
     }
 }

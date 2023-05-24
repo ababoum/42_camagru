@@ -9,35 +9,22 @@
     </div>
 </section>
 
-<p style="margin: 15px;	">Last pictures taken:</p>
+<div class="columns is-vcentered">
+    <div class="column is-half">
+        <div class="content">
+            <p><b>Camagru</b> is a webapp where you can:</p>
+            <ul>
+                <li>Take a picture with your webcam and apply a sticker on it!</li>
+                <li>See your posts and other people's posts</li>
+                <li>Like and comment the posts</li>
+            </ul>
+        </div>
+    </div>
+    <div class="column is-half is-flex is-justify-content-center is-align-items-center">
+        <img src="assets/enjoy.png" alt="Enjoy!" class="center" width="200">
+    </div>
+</div>
 
-<?php
-// Display message box if no posts are available
-if (empty($posts)) {
-?>
-    <div class="box has-text-centered">
-        <p>No posts available.</p>
-    </div>
-<?php
-}
-foreach ($posts as $post) {
-?>
-    <div class="box">
-        <h3 class="title is-3">
-            <?= htmlspecialchars($post->title); ?>
-        </h3>
-        <em>Taken on
-            <?= $post->creationDate; ?>
-        </em>
-        <p>
-            <img src="<?= $post->image_path; ?>" alt="Picture taken on <?= $post->creationDate; ?>" />
-            <br />
-            <em><a href="index.php?action=post&id=<?= urlencode($post->id) ?>">Comments</a></em>
-        </p>
-    </div>
-<?php
-}
-?>
 <?php $content = ob_get_clean(); ?>
 
 <?php require_once('header.php') ?>

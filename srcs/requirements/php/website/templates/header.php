@@ -17,6 +17,10 @@
                 Home
             </a>
 
+            <a class="navbar-item" href="index.php?action=gallery">
+                Gallery
+            </a>
+
             <a class="navbar-item" href="index.php?action=profile">
                 Profile
             </a>

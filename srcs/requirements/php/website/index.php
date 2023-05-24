@@ -2,6 +2,7 @@
 
 require_once('src/controllers/comment/add.php');
 require_once('src/controllers/homepage.php');
+require_once('src/controllers/gallery.php');
 require_once('src/controllers/post.php');
 require_once('src/controllers/webcam.php');
 require_once('src/controllers/login.php');
@@ -11,6 +12,7 @@ require_once('src/controllers/auth.php');
 
 use Application\Controllers\Comment\Add\AddComment;
 use Application\Controllers\Homepage\Homepage;
+use Application\Controllers\Gallery\Gallery;
 use Application\Controllers\Post\Post;
 use Application\Controllers\Webcam\Webcam;
 use Application\Controllers\Login\Login;
@@ -96,12 +98,65 @@ try {
     else {
         // AN ACTION IS REQUESTED
         if (isset($_GET['action']) && $_GET['action'] !== '') {
+            // GALLERY RELATED ROUTES
+            if ($_GET['action'] === 'gallery') {
+                if (isset($_GET['page']) && $_GET['page'] > 0) {
+                    $page = $_GET['page'];
+                    (new Gallery())->execute_page($page, $_SESSION['id']);
+                } else if (isset($_GET['page']) && $_GET['page'] <= 0) {
+                    throw new Exception('Page number must be greater than 0');
+                } else {
+                    (new Gallery())->execute_page(1, $_SESSION['id']); // page 1 by default
+                }
+            }
             // POST RELATED ROUTES
-            if ($_GET['action'] === 'post') {
+            else if ($_GET['action'] === 'post') {
                 if (isset($_GET['id']) && $_GET['id'] > 0) {
                     $id = $_GET['id'];
-
-                    (new Post())->execute($id);
+                    (new Post())->show($id, $_SESSION['id']);
+                } else {
+                    throw new Exception('No image id sent');
+                }
+            } else if ($_GET['action'] === 'delete_post') { // active user only
+                if (!isset($_SESSION['active']) || !$_SESSION['active']) {
+                    throw new Exception("You need to be an active user to access this page.");
+                }
+                if (isset($_GET['id'])) {
+                    $page = $_GET['page'] ?? 1;
+                    if (!isset($_GET['source'])) {
+                        $source = 'gallery';
+                    }
+                    else if ($_GET['source'] === 'cam') {
+                        $source = 'cam';
+                    } else if ($_GET['source'] === 'gallery') {
+                        $source = 'gallery';
+                    }
+                    $post_id = $_GET['id'];
+                    (new Post())->delete_post($post_id, $source, $page);
+                }
+            }
+            else if ($_GET['action'] === 'unlike_post') {
+                if (isset($_GET['id'])) {
+                    $post_id = $_GET['id'];
+                    $current_page = $_GET['page'] ?? 1;
+                    $current_page = (int)$current_page;
+                    if ($current_page <= 0) {
+                        $current_page = 1;
+                    }
+                    (new Post())->unlike_post($post_id, $_SESSION['id'], $current_page);
+                } else {
+                    throw new Exception('No image id sent');
+                }
+            }
+            else if ($_GET['action'] === 'like_post') {
+                if (isset($_GET['id'])) {
+                    $post_id = $_GET['id'];
+                    $current_page = $_GET['page'] ?? 1;
+                    $current_page = (int)$current_page;
+                    if ($current_page <= 0) {
+                        $current_page = 1;
+                    }
+                    (new Post())->like_post($post_id, $_SESSION['id'], $current_page);
                 } else {
                     throw new Exception('No image id sent');
                 }
@@ -115,8 +170,7 @@ try {
                 $re_password = $_POST['re_password'] ?? "";
                 $id = $_SESSION['id'] ?? "";
                 (new Profile())->update_user($id, $username, $email, $password, $re_password);
-            }
-            else if ($_GET['action'] === 'update_email_notifications') {
+            } else if ($_GET['action'] === 'update_email_notifications') {
                 if (isset($_GET['value'])) {
                     $value = $_GET['value'];
                     $user_id = $_SESSION['id'];
@@ -161,29 +215,22 @@ try {
                     throw new Exception("Current user cannot be identified.");
                 }
             }
-            // WEBCAM RELATED ROUTES
+            // WEBCAM RELATED ROUTES (active users only)
             else if ($_GET['action'] === 'webcam') {
+                if (!isset($_SESSION['active']) || !$_SESSION['active']) {
+                    throw new Exception("You need to be an active user to access this page.");
+                }
                 (new Webcam())->execute();
-            }
-            else if ($_GET['action'] === 'save_shot') {
+            } else if ($_GET['action'] === 'save_shot') {
+                if (!isset($_SESSION['active']) || !$_SESSION['active']) {
+                    throw new Exception("You need to be an active user to access this page.");
+                }
                 if (isset($_POST['webcamImage']) && isset($_POST['selectedSticker'])) {
                     $img = str_replace('data:image/png;base64,', '', $_POST['webcamImage']);
                     $filter = $_POST['selectedSticker'];
                     (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
                 } else {
                     throw new Exception("No image or filter sent.");
-                }
-            }
-            // POSTS RELATED ROUTES
-            else if ($_GET['action'] === 'delete_post') {
-                if (isset($_GET['id']) && isset($_GET['source'])) {
-                    if ($_GET['source'] === 'cam') {
-                        $source = 'cam';
-                    } else if ($_GET['source'] === 'home') {
-                        $source = 'home';
-                    }
-                    $post_id = $_GET['id'];
-                    (new Post())->delete_post($post_id, $source);
                 }
             }
             // UNDEFINED ROUTE
