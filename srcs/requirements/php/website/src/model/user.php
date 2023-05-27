@@ -132,15 +132,13 @@ class UserRepository
         // Generate an activation code
         $activation_code = MailingTools::generate_activation_code();
         $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
-        $activation_expiration = date('Y-m-d H:i:s', strtotime('+1 day'));
-
 
         // Insert the user into the database
         $statement = $this->connection->getConnection()->prepare(
-            "INSERT INTO users (username, password, email, activation_code, activation_expiration)
+            "INSERT INTO users (username, password, email, activation_code)
             VALUES (?, ?, ?, ?, ?)"
         );
-        $statement->execute([$username, $password, $email, $hashed_activation_code, $activation_expiration]);
+        $statement->execute([$username, $password, $email, $hashed_activation_code]);
 
         if ($statement->rowCount() === 0) {
             throw new \Exception('Something went wrong. Please try again.');
@@ -210,7 +208,7 @@ class UserRepository
     public function find_unverified_user(string $email, string $activation_code)
     {
         $statement = $this->connection->getConnection()->prepare(
-            'SELECT id, activation_code, activation_expiration < now() as expired
+            'SELECT id, activation_code
             FROM users
             WHERE active = 0 AND email = ?'
         );
@@ -219,10 +217,6 @@ class UserRepository
 
         if ($row === false) {
             throw new \Exception('Email doesn\'t exist, or user is already verified.');
-        }
-
-        if ($row['expired'] === 1) {
-            throw new \Exception('Activation code has expired.');
         }
 
         if (!password_verify($activation_code, $row['activation_code'])) {

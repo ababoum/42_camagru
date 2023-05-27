@@ -46,6 +46,10 @@ try {
                     throw new Exception('No image id sent');
                 }
             }
+            // Homepage request
+            else if ($_GET['action'] === 'homepage') {
+                (new Homepage())->execute();
+            }
             // Received login form data
             else if (
                 $_GET['action'] === 'login'
@@ -77,7 +81,19 @@ try {
                 else {
                     (new Signup())->execute();
                 }
-            } else if ($_GET['action'] === 'reset_password') {
+            }
+            // ACTIVATION RELATED ROUTES
+            else if ($_GET['action'] === 'activate') {
+                if (isset($_GET['email']) && isset($_GET['activation_code'])) {
+                    $email = $_GET['email'];
+                    $activation_code = $_GET['activation_code'];
+                    (new Auth())->activate_user($email, $activation_code);
+                } else {
+                    throw new Exception('No email or activation code sent.');
+                }
+            }
+            // Reset password process
+            else if ($_GET['action'] === 'reset_password') {
                 // Received reset password form data
                 if (isset($_POST['email'])) {
                     $email = $_POST['email'];
@@ -229,23 +245,6 @@ try {
             // PROFILE RELATED ROUTES
             else if ($_GET['action'] === 'profile') {
                 (new Profile())->execute();
-            }
-            // ACTIVATION RELATED ROUTES
-            else if ($_GET['action'] === 'activate') {
-                if (isset($_GET['email']) && isset($_GET['activation_code'])) {
-                    $email = $_GET['email'];
-                    $activation_code = $_GET['activation_code'];
-                    (new Auth())->activate_user($email, $activation_code);
-                } else {
-                    throw new Exception('No email or activation code sent.');
-                }
-            } else if ($_GET['action'] === 'resend_activation') {
-                if (isset($_SESSION['id'])) {
-                    $user_id = $_SESSION['id'];
-                    (new Auth())->resend_activation($user_id);
-                } else {
-                    throw new Exception("Current user cannot be identified.");
-                }
             }
             // WEBCAM RELATED ROUTES (active users only)
             else if ($_GET['action'] === 'webcam') {

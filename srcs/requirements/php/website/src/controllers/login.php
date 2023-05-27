@@ -85,7 +85,8 @@ class Login
         $userRepository->connection = new DatabaseConnection();
 
         $statement = $userRepository->connection->getConnection()->prepare(
-            'SELECT * FROM password_resets WHERE email = :email AND expiration > NOW()'
+            'SELECT * FROM password_resets
+            WHERE email = :email AND expiration > NOW()'
         );
         $statement->execute([
             ':email' => $email
@@ -147,7 +148,8 @@ class Login
 
         // Delete any existing tokens for this email/user
         $statement = $userRepository->connection->getConnection()->prepare(
-            'DELETE FROM password_resets WHERE email = :email'
+            'DELETE FROM password_resets
+            WHERE email = :email'
         );
         $statement->execute([
             ':email' => $email

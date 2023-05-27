@@ -10,6 +10,8 @@ services:
       context: requirements/php/
     env_file:
       - .env
+    environment:
+      - SESSION_MANAGER=${SESSION_MANAGER}
     networks:
       - camagru_network
     # volumes:
