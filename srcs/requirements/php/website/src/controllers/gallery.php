@@ -10,15 +10,6 @@ use Application\Model\Post\PostRepository;
 
 class Gallery
 {
-    // public function execute()
-    // {
-    //     $postRepository = new PostRepository();
-    //     $postRepository->connection = new DatabaseConnection();
-    //     $posts = $postRepository->get_posts();
-
-    //     require('templates/gallery.php');
-    // }
-
     public function execute_page(int $page, string $current_user_id)
     {
         $postRepository = new PostRepository();

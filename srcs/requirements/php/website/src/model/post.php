@@ -14,6 +14,7 @@ class Post
     public string $id;
     public string $author_id;
     public int $nb_likes;
+    public int $nb_comments;
     public bool $does_current_user_like_post = false;
 }
 
@@ -44,6 +45,7 @@ class PostRepository
         $post->id = $row['id'];
         $post->author_id = $row['author_id'];
         $post->nb_likes = $row['number_of_likes'];
+        $post->nb_comments = 0; // is not used in this context
         $post->does_current_user_like_post = false; // is not used in this context
 
         return $post;
@@ -69,10 +71,12 @@ class PostRepository
                     posts.user_id AS author_id,
                     DATE_FORMAT(posts.creation_date, '%d-%M-%Y at %Hh%imin%ss') AS creation_date,
                     COUNT(likes.id) AS number_of_likes,
+                    COUNT(comments.id) AS number_of_comments,
                     IF(COUNT(user_likes.id) > 0, 1, 0) AS user_likes_post
             FROM posts
             LEFT JOIN likes ON posts.id = likes.post_id
             LEFT JOIN likes AS user_likes ON likes.post_id = user_likes.post_id AND user_likes.user_id = :current_user_id
+            LEFT JOIN comments ON posts.id = comments.post_id
             GROUP BY posts.id
             ORDER BY creation_date DESC
             LIMIT :page_index, 5"
@@ -91,6 +95,7 @@ class PostRepository
             $post->id = $row['id'];
             $post->author_id = $row['author_id'];
             $post->nb_likes = $row['number_of_likes'];
+            $post->nb_comments = $row['number_of_comments'];
             $post->does_current_user_like_post = $row['user_likes_post'];
 
             $posts[] = $post;
@@ -99,12 +104,12 @@ class PostRepository
         return $posts;
     }
 
-    public function save_post(string $image_path, $user_id): void
+    public function save_post(string $image_path, string $user_id, string $username): void
     {
         $statement = $this->connection->getConnection()->prepare(
-            "INSERT INTO posts (user_id, image_path) VALUES (?, ?)"
+            "INSERT INTO posts (user_id, title, image_path) VALUES (?, ?, ?)"
         );
-        $statement->execute([$user_id, $image_path]);
+        $statement->execute([$user_id, 'Post by ' . $username, $image_path]);
     }
 
     public function get_posts_by_user_id(string $user_id): array

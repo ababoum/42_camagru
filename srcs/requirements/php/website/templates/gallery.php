@@ -22,7 +22,7 @@ if (empty($posts)) {
     <?php foreach ($posts as $post) {
         ?>
         <div class="box has-text-centered">
-            <h3 class="title is-3">
+            <h3 class="title is-4">
                 <?= htmlspecialchars($post->title); ?>
             </h3>
             <em>Taken on
@@ -45,8 +45,10 @@ if (empty($posts)) {
                     <?= $post->nb_likes; ?> likes
                 <?php } ?>
                 —
-                <a href="index.php?action=post&id=<?= urlencode($post->id) ?>">Comments</a>
-                <?php if ($post->author_id == $_SESSION['id']) { ?>
+                <a href="index.php?action=post&id=<?= urlencode($post->id) ?>">
+                    <?= $post->nb_comments; ?>&nbsp;<?= $post->nb_comments == 1 ? 'comment' : 'comments' ?>
+                </a>
+                <?php if (isset($_SESSION['id']) && $post->author_id == $_SESSION['id']) { ?>
                     <br />
                     <button class="button is-danger"
                         onclick="window.location.href='index.php?action=delete_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>'">Delete</button>

@@ -10,6 +10,7 @@ require_once('src/lib/imgtools.php');
 use Application\Lib\Database\DatabaseConnection;
 use Application\Model\Sticker\StickerRepository;
 use Application\Model\Post\PostRepository;
+use Application\Model\User\UserRepository;
 use \Application\Lib\ImgTools\ImgTools;
 
 class Webcam
@@ -29,7 +30,7 @@ class Webcam
         require('templates/webcam.php');
     }
 
-    public function save_shot($img, $filter, $user_id)
+    public function save_shot(string $img, string $filter, string $user_id)
     {
         // Check images extension
         $img = base64_decode($img);
@@ -62,7 +63,12 @@ class Webcam
         if (ImgTools::super_impose($img, $filter, $new_img_path) === false)
             throw new \Exception('Error while superimposing image');
 
-        $postRepository->save_post($new_img_path, $user_id);
+        // Fetch the user's username
+        $userRepository = new UserRepository();
+        $userRepository->connection = new DatabaseConnection();
+
+        $user = $userRepository->get_user_by_id($user_id);
+        $postRepository->save_post($new_img_path, $user_id, $user->username);
 
         // Redirect to gallery
         header('Location: index.php?action=webcam');

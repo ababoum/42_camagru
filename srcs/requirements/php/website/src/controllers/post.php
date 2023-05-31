@@ -33,10 +33,6 @@ class Post
     {
         $connection = new DatabaseConnection();
 
-        $postRepository = new PostRepository();
-        $postRepository->connection = $connection;
-        $postRepository->delete_post($post_id);
-
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;
         $commentRepository->delete_comments($post_id);
@@ -44,6 +40,11 @@ class Post
         $likeRepository = new LikeRepository();
         $likeRepository->connection = $connection;
         $likeRepository->delete_likes($post_id);
+
+        $postRepository = new PostRepository();
+        $postRepository->connection = $connection;
+        $postRepository->delete_post($post_id);
+
 
         if ($source == 'cam') {
             header('Location: index.php?action=webcam');
@@ -60,7 +61,7 @@ class Post
         $likeRepository->connection = $connection;
         $likeRepository->like_post($post_id, $liker_id);
 
-        header('Location: index.php?action=gallery&page=' . $current_page);        
+        header('Location: index.php?action=gallery&page=' . $current_page);
     }
 
     public function unlike_post(string $post_id, string $liker_id, int $current_page): void
@@ -71,6 +72,6 @@ class Post
         $likeRepository->connection = $connection;
         $likeRepository->unlike_post($post_id, $liker_id);
 
-        header('Location: index.php?action=gallery&page=' . $current_page);        
+        header('Location: index.php?action=gallery&page=' . $current_page);
     }
 }

@@ -136,7 +136,7 @@ class UserRepository
         // Insert the user into the database
         $statement = $this->connection->getConnection()->prepare(
             "INSERT INTO users (username, password, email, activation_code)
-            VALUES (?, ?, ?, ?, ?)"
+            VALUES (?, ?, ?, ?)"
         );
         $statement->execute([$username, $password, $email, $hashed_activation_code]);
 
