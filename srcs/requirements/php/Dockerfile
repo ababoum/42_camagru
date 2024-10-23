@@ -1,25 +1,28 @@
 FROM php:8.0-apache
 
-RUN docker-php-ext-install pdo pdo_mysql
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y \
+# Install necessary extensions and packages
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
     sendmail \
     libjpeg62-turbo-dev \
     libpng-dev \
     libfreetype6-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure GD extension
-RUN docker-php-ext-configure gd --with-jpeg --with-freetype
+# Install and configure GD extension
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype && \
+    docker-php-ext-install gd
 
-# Install GD extension
-RUN docker-php-ext-install gd
+# Install PDO and PostgreSQL extensions
+RUN docker-php-ext-install pdo pdo_pgsql
 
 WORKDIR /var/www/html
 
-COPY website/ ./
+# Copy Apache configuration
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
 
-# Change owner of the website
-RUN chown -R www-data:www-data /var/www/html
+# Enable Apache modules
+RUN a2enmod rewrite
 
 EXPOSE 80

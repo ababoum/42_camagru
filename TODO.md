@@ -1,6 +1,6 @@
 # TO DO
 
-
+* Get rid of mailer 
 
 # DONE
 

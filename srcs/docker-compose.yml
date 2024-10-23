@@ -14,25 +14,27 @@ services:
       - SESSION_MANAGER=${SESSION_MANAGER}
     networks:
       - camagru_network
-    # volumes:
-    #   - ./requirements/php/website:/var/www/html
+    volumes:
+      - ./requirements/php/website:/var/www/html
     ports:
       - 8000:80
     depends_on:
       - database
     restart: unless-stopped
 
-  #### MYSQL DATABASE ####
+  #### POSTGRESQL DATABASE ####
   database:
-    container_name: mysql
-    image: camagru-database:camagru
-    build:
-      context: requirements/database/
-    restart: unless-stopped
-    env_file:
-      - .env
+    container_name: postgres
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - camagru_network
+    volumes:
+      - ./requirements/database/init/create-db.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
 
   #### PHPMYADMIN ####
   phpmyadmin:
@@ -42,7 +44,7 @@ services:
         - '8080:80'
     restart: unless-stopped
     environment:
-        PMA_HOST: mysql
+        PMA_HOST: postgres
     networks:
       - camagru_network
     depends_on:
