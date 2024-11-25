@@ -17,6 +17,9 @@ RUN docker-php-ext-configure gd --with-jpeg --with-freetype && \
 # Install PDO and PostgreSQL extensions
 RUN docker-php-ext-install pdo pdo_pgsql
 
+# Explicitly enable the pdo_pgsql extension
+RUN docker-php-ext-enable pdo_pgsql
+
 WORKDIR /var/www/html
 
 # Copy Apache configuration
