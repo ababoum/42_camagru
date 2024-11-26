@@ -34,15 +34,15 @@ services:
       - ./requirements/database/init/create-db.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
 
-  #### PHPMYADMIN ####
-  phpmyadmin:
-    container_name: phpmyadmin
-    image: phpmyadmin/phpmyadmin
+  #### ADMINER ####
+  adminer:
+    container_name: adminer
+    image: adminer
     ports:
-        - '8080:80'
+      - '8080:8080'
     restart: unless-stopped
     environment:
-        PMA_HOST: postgres
+      ADMINER_DEFAULT_SERVER: postgres
     networks:
       - camagru_network
     depends_on:

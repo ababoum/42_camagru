@@ -81,17 +81,14 @@ class PostRepository
         try {
             $statement = $this->connection->getConnection()->prepare(
                 "SELECT posts.id,
-                        posts.title,
-                        posts.image_path,
-                        posts.user_id AS author_id,
-                        TO_CHAR(posts.creation_date, 'DD-Mon-YYYY at HH24:MI:SS') AS creation_date,
-                        COUNT(likes.id) AS number_of_likes,
-                        COUNT(comments.id) AS number_of_comments,
-                        CASE WHEN COUNT(user_likes.id) > 0 THEN TRUE ELSE FALSE END AS user_likes_post
+                    posts.title,
+                    posts.image_path,
+                    posts.user_id AS author_id,
+                    TO_CHAR(posts.creation_date, 'DD-Mon-YYYY at HH24:MI:SS') AS creation_date,
+                    (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS number_of_likes,
+                    (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id) AS number_of_comments,
+                    CASE WHEN EXISTS (SELECT 1 FROM likes WHERE likes.post_id = posts.id AND likes.user_id = :current_user_id) THEN TRUE ELSE FALSE END AS user_likes_post
                 FROM posts
-                LEFT JOIN likes ON posts.id = likes.post_id
-                LEFT JOIN likes AS user_likes ON likes.post_id = user_likes.post_id AND user_likes.user_id = :current_user_id
-                LEFT JOIN comments ON posts.id = comments.post_id
                 GROUP BY posts.id, posts.title, posts.image_path, posts.user_id, posts.creation_date
                 ORDER BY posts.creation_date DESC
                 LIMIT 5 OFFSET :page_index"

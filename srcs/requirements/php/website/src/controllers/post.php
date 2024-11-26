@@ -14,17 +14,17 @@ use Application\Model\Like\LikeRepository;
 
 class Post
 {
-    public function show(string $id, string $current_user_id): void
+    public function show(string $post_id, string $current_user_id): void
     {
         $connection = new DatabaseConnection();
 
         $postRepository = new PostRepository();
         $postRepository->connection = $connection;
-        $post = $postRepository->get_post_by_id($id);
+        $post = $postRepository->get_post_by_id($post_id);
 
         $commentRepository = new CommentRepository();
         $commentRepository->connection = $connection;
-        $comments = $commentRepository->get_comments($id);
+        $comments = $commentRepository->get_comments($post_id);
 
         require('templates/post.php');
     }
