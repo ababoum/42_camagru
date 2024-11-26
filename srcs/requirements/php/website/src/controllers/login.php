@@ -11,6 +11,8 @@ use Application\Model\User\UserRepository;
 
 class Login
 {
+    public DatabaseConnection $connection;
+
     public function execute()
     {
         require('templates/login.php');
@@ -112,6 +114,7 @@ class Login
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
+
         try {
             $user = $userRepository->log_user($username, $password);
         } catch (\Exception $e) {
@@ -135,6 +138,7 @@ class Login
         // Check if the email exists in the database
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
+
         $user = $userRepository->get_user_by_email($email);
 
         if (!$user) {

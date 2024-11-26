@@ -17,14 +17,11 @@ class User {
 }
 
 class UserRepository {
-    private DatabaseConnection $connection;
+    public DatabaseConnection $connection;
+
     private const PASSWORD_MIN_LENGTH = 8;
     private const USERNAME_MAX_LENGTH = 50;
     private const EMAIL_MAX_LENGTH = 255;
-
-    public function __construct(DatabaseConnection $connection) {
-        $this->connection = $connection;
-    }
 
     private function validate(string $data): string {
         return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
@@ -39,7 +36,7 @@ class UserRepository {
         }
 
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = ?"
+            "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = $1"
         );
         $statement->execute([$username]);
         $row = $statement->fetch();
@@ -114,18 +111,21 @@ class UserRepository {
         return $user;
     }
 
-    public function get_user_by_id(string $id): User {
+    public function get_user_by_id(string $user_id): User {
+        debug_to_console($this->connection);
         $statement = $this->connection->getConnection()->prepare(
             "SELECT username, email, active, accept_notifications FROM users WHERE id = $1"
         );
-        $statement->execute([$id]);
+        $statement->execute([intval($user_id)]);
+        debug_to_console(intval($user_id));
         $row = $statement->fetch();
+        debug_to_console($row);
 
         if ($row === false) {
             throw new \Exception('User not found.');
         }
 
-        return $this->createUserFromRow($row, $id);
+        return $this->createUserFromRow($row, $user_id);
     }
 
     public function get_user_by_email(string $email): ?User {
@@ -140,7 +140,7 @@ class UserRepository {
 
     public function find_unverified_user(string $email, string $activationCode): int {
         $statement = $this->connection->getConnection()->prepare(
-            'SELECT id, activation_code FROM users WHERE active = FALSE AND email = ?'
+            'SELECT id, activation_code FROM users WHERE active = FALSE AND email = $1'
         );
         $statement->execute([$email]);
         $row = $statement->fetch();
@@ -154,7 +154,7 @@ class UserRepository {
 
     public function activate_user(int $userId): bool {
         $statement = $this->connection->getConnection()->prepare(
-            'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = ?'
+            'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = $1'
         );
         return $statement->execute([$userId]);
     }
@@ -223,7 +223,7 @@ class UserRepository {
 
     private function userExists(string $field, string $value): bool {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE $field = ?"
+            "SELECT id FROM users WHERE $field = $1"
         );
         $statement->execute([$value]);
         return $statement->fetch() !== false;

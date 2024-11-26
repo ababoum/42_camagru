@@ -11,6 +11,8 @@ use Application\Model\User\UserRepository;
 
 class Profile
 {
+    public DatabaseConnection $connection;
+
     public function execute()
     {
         $user = new User();

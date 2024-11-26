@@ -16,11 +16,11 @@ class Comment
 {
     public function add_comment(string $post_id, string $user_id, string $comment)
     {
-        $connection = new DatabaseConnection();
         $commentRepository = new CommentRepository();
+        $commentRepository->connection = new DatabaseConnection();
+        
         $userRepository = new UserRepository();
-        $commentRepository->connection = $connection;
-        $userRepository->connection = $connection;
+        $userRepository->connection = new DatabaseConnection();
 
         $success = $commentRepository->create_comment($post_id, $user_id, $comment);
 

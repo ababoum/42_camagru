@@ -14,16 +14,20 @@ use Application\Model\Like\LikeRepository;
 
 class Post
 {
+    public function __construct()
+    {
+        $this->connection = new DatabaseConnection();
+    }
+
     public function show(string $post_id, string $current_user_id): void
     {
-        $connection = new DatabaseConnection();
-
         $postRepository = new PostRepository();
-        $postRepository->connection = $connection;
+        $postRepository->connection = new DatabaseConnection();
+
         $post = $postRepository->get_post_by_id($post_id);
 
         $commentRepository = new CommentRepository();
-        $commentRepository->connection = $connection;
+        $commentRepository->connection = new DatabaseConnection();
         $comments = $commentRepository->get_comments($post_id);
 
         require('templates/post.php');
@@ -31,18 +35,16 @@ class Post
 
     public function delete_post(string $post_id, string $source, int $page = 1): void
     {
-        $connection = new DatabaseConnection();
-
         $commentRepository = new CommentRepository();
-        $commentRepository->connection = $connection;
+        $commentRepository->connection = new DatabaseConnection();
         $commentRepository->delete_comments($post_id);
 
         $likeRepository = new LikeRepository();
-        $likeRepository->connection = $connection;
+        $likeRepository->connection = new DatabaseConnection();
         $likeRepository->delete_likes($post_id);
 
         $postRepository = new PostRepository();
-        $postRepository->connection = $connection;
+        $postRepository->connection = new DatabaseConnection();
         $postRepository->delete_post($post_id);
 
 
@@ -55,10 +57,8 @@ class Post
 
     public function like_post(string $post_id, string $liker_id, int $current_page): void
     {
-        $connection = new DatabaseConnection();
-
         $likeRepository = new LikeRepository();
-        $likeRepository->connection = $connection;
+        $likeRepository->connection = new DatabaseConnection();
         $likeRepository->like_post($post_id, $liker_id);
 
         header('Location: index.php?action=gallery&page=' . $current_page);
@@ -66,10 +66,8 @@ class Post
 
     public function unlike_post(string $post_id, string $liker_id, int $current_page): void
     {
-        $connection = new DatabaseConnection();
-
         $likeRepository = new LikeRepository();
-        $likeRepository->connection = $connection;
+        $likeRepository->connection = new DatabaseConnection();
         $likeRepository->unlike_post($post_id, $liker_id);
 
         header('Location: index.php?action=gallery&page=' . $current_page);

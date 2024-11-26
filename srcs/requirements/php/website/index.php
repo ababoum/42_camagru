@@ -21,6 +21,18 @@ use Application\Controllers\Profile\Profile;
 use Application\Controllers\Auth\Auth;
 
 session_start();
+
+function debug_to_console($data) {
+    if (is_array($data) || is_object($data)) {
+        $output = json_encode($data);
+    } else {
+        $output = strval($data);
+    }
+    $output = str_replace('"', '\\"', $output); // Escape double quotes
+    echo "<script>console.log(\"Debug Objects: " . $output . "\");</script>";
+}
+
+
 try {
     // Routes availables for non logged in users
     if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {

@@ -10,6 +10,8 @@ use Application\Model\User\UserRepository;
 
 class Signup
 {
+    public DatabaseConnection $connection;
+
     public function execute()
     {
         require('templates/signup.php');
@@ -19,6 +21,7 @@ class Signup
     {
         $userRepository = new UserRepository();
         $userRepository->connection = new DatabaseConnection();
+
         $user = $userRepository->create_user($username, $password, $re_password, $email);
 
         if ($user === false) {
