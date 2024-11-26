@@ -8,8 +8,7 @@ require_once('src/lib/mailingtools.php');
 use Application\Lib\Database\DatabaseConnection;
 use Application\Lib\MailingTools\MailingTools;
 
-class User
-{
+class User {
     public string $username;
     public string $id;
     public string $email;
@@ -17,135 +16,94 @@ class User
     public bool $accept_notifications;
 }
 
-class UserRepository
-{
-    public DatabaseConnection $connection;
+class UserRepository {
+    private DatabaseConnection $connection;
+    private const PASSWORD_MIN_LENGTH = 8;
+    private const USERNAME_MAX_LENGTH = 50;
+    private const EMAIL_MAX_LENGTH = 255;
 
-    public function validate(string $data)
-    {
-        $data = trim($data);
-        $data = stripslashes($data);
-        $data = htmlspecialchars($data);
-        return $data;
+    public function __construct(DatabaseConnection $connection) {
+        $this->connection = $connection;
     }
 
-    public function log_user(string $username, string $password): User
-    {
-        // Validate username
-        $username = $this->validate($username);
-        if (empty($username)) {
-            throw new \Exception('Username is required.');
-        }
+    private function validate(string $data): string {
+        return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
+    }
 
-        // Validate password
+    public function log_user(string $username, string $password): User {
+        $username = $this->validate($username);
         $password = $this->validate($password);
-        if (empty($password)) {
-            throw new \Exception('Password is required.');
+
+        if (empty($username) || empty($password)) {
+            throw new \Exception('Username and password are required.');
         }
 
         $statement = $this->connection->getConnection()->prepare(
             "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = ?"
         );
         $statement->execute([$username]);
-
         $row = $statement->fetch();
-        if ($row === false) {
-            throw new \Exception('Username doesn\'t exist.');
+
+        if ($row === false || !password_verify($password, $row['password'])) {
+            throw new \Exception('Invalid credentials.');
         }
 
-        // Check if password is correct
-        if (!password_verify($password, $row['password'])) {
-            throw new \Exception('Incorrect password.');
-        }
-
-        // Check if user is verified
-        if ($row['active'] === false) {
+        if (!$row['active']) {
             throw new \Exception('Please verify your email address.');
         }
 
-        $user = new User();
-        $user->id = $row['id'];
-        $user->username = $row['username'];
-        $user->email = $row['email'];
-        $user->active = (bool)$row['active'];
-        $user->accept_notifications = (bool)$row['accept_notifications'];
-
-        return $user;
+        return $this->createUserFromRow($row);
     }
 
-    public function create_user(string $username, string $password, string $re_password, string $email): User
-    {
-        // Check if a field is empty
+    public function create_user(string $username, string $password, string $re_password, string $email): User {
+        $username = $this->validate($username);
+        $email = $this->validate($email);
+
         if (empty($username) || empty($password) || empty($re_password) || empty($email)) {
             throw new \Exception('All sign up form fields are required.');
         }
 
-        // Check if username is valid
+        if (strlen($username) > self::USERNAME_MAX_LENGTH) {
+            throw new \Exception('Username is too long.');
+        }
+
+        if (strlen($email) > self::EMAIL_MAX_LENGTH) {
+            throw new \Exception('Email is too long.');
+        }
+
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
             throw new \Exception('Username can only contain letters, numbers and underscores.');
         }
 
-        // Check if email is valid
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \Exception('Email is not valid.');
         }
 
-        // Check if passwords match
         if ($password !== $re_password) {
             throw new \Exception('Passwords do not match.');
         }
 
-        // Check the password complexity
-        $uppercase = preg_match('@[A-Z]@', $password);
-        $lowercase = preg_match('@[a-z]@', $password);
-        $number = preg_match('@[0-9]@', $password);
-        $specialChars = preg_match('@[^\w]@', $password);
-        if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($password) < 8) {
-            throw new \Exception('Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.');
+        $this->validatePasswordStrength($password);
+
+        if ($this->userExists('username', $username) || $this->userExists('email', $email)) {
+            throw new \Exception('Username or email already exists.');
         }
 
-        // Check if username already exists
+        $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
+        $activationCode = MailingTools::generate_activation_code();
+        $hashedActivationCode = password_hash($activationCode, PASSWORD_ARGON2ID);
+
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE username = ?"
+            "INSERT INTO users (username, password, email, activation_code) VALUES ($1, $2, $3, $4) RETURNING id"
         );
-        $statement->execute([$username]);
-        $row = $statement->fetch();
-        if ($row !== false) {
-            throw new \Exception('Username already exists.');
-        }
-
-        // Check if email already exists
-        $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE email = ?"
-        );
-        $statement->execute([$email]);
-        $row = $statement->fetch();
-        if ($row !== false) {
-            throw new \Exception('Email already exists.');
-        }
-
-        // Hash the password
-        $password = password_hash($password, PASSWORD_DEFAULT);
-
-        // Generate an activation code
-        $activation_code = MailingTools::generate_activation_code();
-        $hashed_activation_code = password_hash($activation_code, PASSWORD_DEFAULT);
-
-        // Insert the user into the database
-        $statement = $this->connection->getConnection()->prepare(
-            "INSERT INTO users (username, password, email, activation_code)
-            VALUES (?, ?, ?, ?)"
-        );
-        $statement->execute([$username, $password, $email, $hashed_activation_code]);
+        $statement->execute([$username, $hashedPassword, $email, $hashedActivationCode]);
 
         if ($statement->rowCount() === 0) {
-            throw new \Exception('Something went wrong. Please try again.');
+            throw new \Exception('Failed to create user. Please try again.');
         }
 
-        // Send an activation email
-        MailingTools::send_activation_email($email, $activation_code);
+        MailingTools::send_activation_email($email, $activationCode);
 
-        // Prepare a user instance to log the user in
         $user = new User();
         $user->id = $this->connection->getConnection()->lastInsertId();
         $user->username = $username;
@@ -155,190 +113,140 @@ class UserRepository
 
         return $user;
     }
-    public function get_user_by_id(string $id): User
-    {
+
+    public function get_user_by_id(string $id): User {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT username, email, active, accept_notifications FROM users WHERE id = ?"
+            "SELECT username, email, active, accept_notifications FROM users WHERE id = $1"
         );
         $statement->execute([$id]);
-
         $row = $statement->fetch();
+
         if ($row === false) {
-            throw new \Exception('User doesn\'t exist.');
+            throw new \Exception('User not found.');
         }
 
-        $user = new User();
-        $user->id = $id;
-        $user->username = $row['username'];
-        $user->email = $row['email'];
-        $user->active = (bool)$row['active'];
-        $user->accept_notifications = (bool)$row['accept_notifications'];
-
-        return $user;
+        return $this->createUserFromRow($row, $id);
     }
 
-    public function get_user_by_email(string $email): User | null
-    {
+    public function get_user_by_email(string $email): ?User {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, active, accept_notifications FROM users WHERE email = ?"
+            "SELECT id, username, email, active, accept_notifications FROM users WHERE email = $1"
         );
         $statement->execute([$email]);
-
         $row = $statement->fetch();
-        if ($row === false) {
-            return null;
-        }
 
-        $user = new User();
-        $user->id = $row['id'];
-        $user->username = $row['username'];
-        $user->email = $email;
-        $user->active = (bool)$row['active'];
-        $user->accept_notifications = (bool)$row['accept_notifications'];
-
-        return $user;
+        return $row ? $this->createUserFromRow($row) : null;
     }
 
-    public function find_unverified_user(string $email, string $activation_code)
-    {
+    public function find_unverified_user(string $email, string $activationCode): int {
         $statement = $this->connection->getConnection()->prepare(
             'SELECT id, activation_code FROM users WHERE active = FALSE AND email = ?'
         );
         $statement->execute([$email]);
-
         $row = $statement->fetch();
-        if ($row === false) {
-            throw new \Exception('Email doesn\'t exist, or user is already verified.');
-        }
 
-        if (!password_verify($activation_code, $row['activation_code'])) {
-            throw new \Exception('Incorrect activation code.');
+        if ($row === false || !password_verify($activationCode, $row['activation_code'])) {
+            throw new \Exception('Invalid activation attempt.');
         }
 
         return $row['id'];
     }
 
-    public function activate_user(int $user_id): bool
-    {
+    public function activate_user(int $userId): bool {
         $statement = $this->connection->getConnection()->prepare(
             'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = ?'
         );
-        return $statement->execute([$user_id]);
+        return $statement->execute([$userId]);
     }
 
-    public function update_username(string $id, string $new_username): string
-    {
-        // Validate username
-        $new_username = $this->validate($new_username);
-        if (empty($new_username)) {
-            throw new \Exception('Username is required.');
+    public function update_username(string $id, string $newUsername): string {
+        $newUsername = $this->validate($newUsername);
+
+        if (empty($newUsername) || strlen($newUsername) > self::USERNAME_MAX_LENGTH) {
+            throw new \Exception('Invalid username.');
         }
 
-        // Check if username is valid
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $new_username)) {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $newUsername)) {
             throw new \Exception('Username can only contain letters, numbers and underscores.');
         }
 
-        // Check if username already exists
-        $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE username = ?"
-        );
-        $statement->execute([$new_username]);
-        $row = $statement->fetch();
-        if ($row !== false) {
+        if ($this->userExists('username', $newUsername)) {
             throw new \Exception('Username already exists.');
         }
 
-        // Update the username
-        $statement = $this->connection->getConnection()->prepare(
-            "UPDATE users SET username = ? WHERE id = ?"
-        );
-        $statement->execute([$new_username, $id]);
-
-        if ($statement->rowCount() === 0) {
-            throw new \Exception('Something went wrong. Please try again.');
-        }
-
-        return $new_username;
+        $this->updateUserField($id, 'username', $newUsername);
+        return $newUsername;
     }
 
-    public function updateEmail(string $id, string $new_email): string
-    {
-        // Validate email
-        $new_email = $this->validate($new_email);
-        if (empty($new_email)) {
-            throw new \Exception('Email is required.');
+    public function updateEmail(string $id, string $newEmail): string {
+        $newEmail = $this->validate($newEmail);
+
+        if (empty($newEmail) || strlen($newEmail) > self::EMAIL_MAX_LENGTH || !filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception('Invalid email.');
         }
 
-        // Check if email is valid
-        if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-            throw new \Exception('Email is not valid.');
-        }
-
-        // Check if email already exists
-        $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE email = ?"
-        );
-        $statement->execute([$new_email]);
-        $row = $statement->fetch();
-        if ($row !== false) {
+        if ($this->userExists('email', $newEmail)) {
             throw new \Exception('Email already exists.');
         }
 
-        // Update the email
-        $statement = $this->connection->getConnection()->prepare(
-            "UPDATE users SET email = ? WHERE id = ?"
-        );
-        $statement->execute([$new_email, $id]);
-
-        if ($statement->rowCount() === 0) {
-            throw new \Exception('Something went wrong. Please try again.');
-        }
-
-        return $new_email;
+        $this->updateUserField($id, 'email', $newEmail);
+        return $newEmail;
     }
 
-    public function updatePassword(string $id, string $new_password)
-    {
-        // Validate password
-        if (empty($new_password)) {
+    public function updatePassword(string $id, string $newPassword): void {
+        if (empty($newPassword)) {
             throw new \Exception('Password is required.');
         }
 
-        // Check the password complexity
-        $uppercase = preg_match('@[A-Z]@', $new_password);
-        $lowercase = preg_match('@[a-z]@', $new_password);
-        $number = preg_match('@[0-9]@', $new_password);
-        $specialChars = preg_match('@[^\w]@', $new_password);
-        if (!$uppercase || !$lowercase || !$number || !$specialChars || strlen($new_password) < 8) {
-            throw new \Exception('Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.');
-        }
+        $this->validatePasswordStrength($newPassword);
 
-        // Hash the password
-        $new_password = password_hash($new_password, PASSWORD_DEFAULT);
+        $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
+        $this->updateUserField($id, 'password', $hashedPassword);
+    }
 
-        // Update the password
-        $statement = $this->connection->getConnection()->prepare(
-            "UPDATE users SET password = ? WHERE id = ?"
-        );
-        $statement->execute([$new_password, $id]);
+    public function update_email_notifications(string $userId, bool $acceptNotifications): bool {
+        $this->updateUserField($userId, 'accept_notifications', $acceptNotifications);
+        return $acceptNotifications;
+    }
 
-        if ($statement->rowCount() === 0) {
-            throw new \Exception('Something went wrong. Please try again.');
+    private function validatePasswordStrength(string $password): void {
+        if (
+            strlen($password) < self::PASSWORD_MIN_LENGTH ||
+            !preg_match('/[A-Z]/', $password) ||
+            !preg_match('/[a-z]/', $password) ||
+            !preg_match('/[0-9]/', $password) ||
+            !preg_match('/[^A-Za-z0-9]/', $password)
+        ) {
+            throw new \Exception('Password must be at least ' . self::PASSWORD_MIN_LENGTH . ' characters long and include uppercase, lowercase, number, and special character.');
         }
     }
 
-    public function update_email_notifications(string $user_id, bool $accept_notifications): bool
-    {
+    private function userExists(string $field, string $value): bool {
         $statement = $this->connection->getConnection()->prepare(
-            "UPDATE users SET accept_notifications = ? WHERE id = ?"
+            "SELECT id FROM users WHERE $field = ?"
         );
-        $statement->execute([$accept_notifications, $user_id]);
+        $statement->execute([$value]);
+        return $statement->fetch() !== false;
+    }
+
+    private function updateUserField(string $id, string $field, $value): void {
+        $statement = $this->connection->getConnection()->prepare(
+            "UPDATE users SET $field = $1 WHERE id = $2"
+        );
+        $statement->execute([$value, $id]);
 
         if ($statement->rowCount() === 0) {
-            throw new \Exception('Something went wrong. Please try again.');
+            throw new \Exception('Failed to update user. Please try again.');
         }
+    }
 
-        return $accept_notifications;
+    private function createUserFromRow(array $row, ?string $id = null): User {
+        $user = new User();
+        $user->id = $id ?? $row['id'];
+        $user->username = $row['username'];
+        $user->email = $row['email'];
+        $user->active = (bool)$row['active'];
+        $user->accept_notifications = (bool)$row['accept_notifications'];
+        return $user;
     }
 }
