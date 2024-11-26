@@ -24,7 +24,7 @@ class CommentRepository
     {
         $statement = $this->connection->getConnection()->prepare(
             "SELECT c.id, u.username AS author, c.user_id, comment,
-                DATE_FORMAT(c.creation_date, '%d-%M-%Y at %Hh%imin%ss') AS creation_date,
+                TO_CHAR(c.creation_date, 'DD-Mon-YYYY at HH24:MI:SS') AS creation_date,
                 post_id
             FROM comments c
             LEFT JOIN users u ON c.user_id = u.id
@@ -54,7 +54,7 @@ class CommentRepository
         $statement = $this->connection->getConnection()->prepare(
             "SELECT c.id, c.user_id, c.post_id, c.comment,
                 u.username AS author,
-                DATE_FORMAT(c.creation_date, '%d-%M-%Y at %Hh%imin%ss') AS creation_date
+                TO_CHAR(c.creation_date, 'DD-Mon-YYYY at HH24:MI:SS') AS creation_date
             FROM comments c
             LEFT JOIN users u ON c.user_id = u.id
             WHERE c.id = ?"

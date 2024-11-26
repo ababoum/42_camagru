@@ -44,13 +44,11 @@ class UserRepository
         }
 
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, password, active, accept_notifications
-            FROM users
-            WHERE username = ?"
+            "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = ?"
         );
         $statement->execute([$username]);
-        $row = $statement->fetch();
 
+        $row = $statement->fetch();
         if ($row === false) {
             throw new \Exception('Username doesn\'t exist.');
         }
@@ -61,7 +59,7 @@ class UserRepository
         }
 
         // Check if user is verified
-        if ($row['active'] === '0') {
+        if ($row['active'] === false) {
             throw new \Exception('Please verify your email address.');
         }
 
@@ -69,8 +67,8 @@ class UserRepository
         $user->id = $row['id'];
         $user->username = $row['username'];
         $user->email = $row['email'];
-        $user->active = $row['active'];
-        $user->accept_notifications = $row['accept_notifications'];
+        $user->active = (bool)$row['active'];
+        $user->accept_notifications = (bool)$row['accept_notifications'];
 
         return $user;
     }
@@ -157,17 +155,14 @@ class UserRepository
 
         return $user;
     }
-
     public function get_user_by_id(string $id): User
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT username, email, active, accept_notifications
-            FROM users
-            WHERE id = ?"
+            "SELECT username, email, active, accept_notifications FROM users WHERE id = ?"
         );
         $statement->execute([$id]);
-        $row = $statement->fetch();
 
+        $row = $statement->fetch();
         if ($row === false) {
             throw new \Exception('User doesn\'t exist.');
         }
@@ -176,8 +171,8 @@ class UserRepository
         $user->id = $id;
         $user->username = $row['username'];
         $user->email = $row['email'];
-        $user->active = $row['active'];
-        $user->accept_notifications = $row['accept_notifications'];
+        $user->active = (bool)$row['active'];
+        $user->accept_notifications = (bool)$row['accept_notifications'];
 
         return $user;
     }
@@ -185,12 +180,11 @@ class UserRepository
     public function get_user_by_email(string $email): User | null
     {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, active, accept_notifications
-            FROM users WHERE email = ?"
+            "SELECT id, username, email, active, accept_notifications FROM users WHERE email = ?"
         );
         $statement->execute([$email]);
-        $row = $statement->fetch();
 
+        $row = $statement->fetch();
         if ($row === false) {
             return null;
         }
@@ -199,8 +193,8 @@ class UserRepository
         $user->id = $row['id'];
         $user->username = $row['username'];
         $user->email = $email;
-        $user->active = $row['active'];
-        $user->accept_notifications = $row['accept_notifications'];
+        $user->active = (bool)$row['active'];
+        $user->accept_notifications = (bool)$row['accept_notifications'];
 
         return $user;
     }
@@ -208,13 +202,11 @@ class UserRepository
     public function find_unverified_user(string $email, string $activation_code)
     {
         $statement = $this->connection->getConnection()->prepare(
-            'SELECT id, activation_code
-            FROM users
-            WHERE active = 0 AND email = ?'
+            'SELECT id, activation_code FROM users WHERE active = FALSE AND email = ?'
         );
         $statement->execute([$email]);
-        $row = $statement->fetch();
 
+        $row = $statement->fetch();
         if ($row === false) {
             throw new \Exception('Email doesn\'t exist, or user is already verified.');
         }
@@ -229,10 +221,7 @@ class UserRepository
     public function activate_user(int $user_id): bool
     {
         $statement = $this->connection->getConnection()->prepare(
-            'UPDATE users
-            SET active = 1,
-                activated_at = CURRENT_TIMESTAMP
-            WHERE id = ?'
+            'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = ?'
         );
         return $statement->execute([$user_id]);
     }
@@ -339,7 +328,7 @@ class UserRepository
         }
     }
 
-    public function update_email_notifications(string $user_id, int $accept_notifications): bool
+    public function update_email_notifications(string $user_id, bool $accept_notifications): bool
     {
         $statement = $this->connection->getConnection()->prepare(
             "UPDATE users SET accept_notifications = ? WHERE id = ?"

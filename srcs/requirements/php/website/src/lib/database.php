@@ -16,13 +16,14 @@ class DatabaseConnection
             $dbuser = DBUSER;
             $dbpass = DBPASS;
             $this->database = new \PDO(
-                "mysql:host=$dbhost;dbname=$dbname;charset=utf8",
+                "pgsql:host=$dbhost;dbname=$dbname",
                 $dbuser,
                 $dbpass,
                 [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
         }
-
+    
         return $this->database;
     }
+    
 }
