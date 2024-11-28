@@ -42,7 +42,7 @@
                     </div>
                     <!-- Snapshot Preview -->
                     <div class="box">
-                        <div id="snapshotPreviewContainer" class="has-text-centered">
+                        <div id="snapshotPreviewContainer" class="has-text-centered" hidden>
                             <h3 class="title is-5 has-text-centered">Snapshot preview</h3>
                             <div class="columns is-centered">
                                 <div class="column">
@@ -182,7 +182,6 @@
             document.getElementById('stickerSize').value = Math.max(0, Math.min(1, relativeStickerSize));
             document.getElementById('canvasWidth').value = document.getElementById('snapshotCanvas').width;
             document.getElementById('canvasHeight').value = document.getElementById('snapshotCanvas').height;
-
         }
     }
 
@@ -254,10 +253,16 @@
                 });
         }
         
+        // Get video dimensions once when metadata is loaded
+        video.addEventListener("loadedmetadata", function (e) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+        }, false);
+
         // Handle snapshot capture
         takeSnapshotButton.addEventListener('click', function () {
             // Capture snapshot from the video stream
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             // Convert the canvas image to base64 data URL
             var imageDataURL = canvas.toDataURL('image/png');
             // Set the base64 image data as the value of the webcam image input field
@@ -267,8 +272,8 @@
             snapshotPreviewImage.style.display = 'block';
             hasImage = true;
             updateSubmitButton();
-            // Console log the size of the snapshot (width and height in pixels)
-            console.log('Snapshot size: ' + canvas.width + 'x' + canvas.height);
+            // Console log the size of the snapshot
+            console.log('Snapshot size: ' + video.videoWidth + 'x' + video.videoHeight);
         });
     });
 
