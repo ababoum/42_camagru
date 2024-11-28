@@ -19,8 +19,9 @@
                         <div class="columns is-centered">
                             <div class="column">
                                 <!-- Webcam preview container -->
-                                <div id="webcamPreviewContainer" class="mb-1">
+                                <div id="webcamPreviewContainer" class="mb-1" style="position: relative;">
                                     <video id="webcamPreviewVideo" width="100%" height="auto" autoplay playsinline></video>
+                                    <canvas id="overlayCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
                                 </div>
                                 <div class="columns is-centered is-vcentered">
                                     <div class="column is-flex is-justify-content-center">
@@ -80,6 +81,11 @@
                                 </div>
                             </div>
                             <input id="webcamImage" type="hidden" name="webcamImage" required>
+                            <input id="stickerX" type="hidden" name="stickerX" value="0">
+                            <input id="stickerY" type="hidden" name="stickerY" value="0">
+                            <input id="stickerSize" type="hidden" name="stickerSize" value="0">
+                            <input id="canvasWidth" type="hidden" name="canvasWidth">
+                            <input id="canvasHeight" type="hidden" name="canvasHeight">
                         </form>
                     </div>
                     <!-- PREVIEW OF POSTS -->
@@ -122,13 +128,107 @@
 </section>
 
 <script>
+    let isDragging = false;
+    let currentX = 0;
+    let currentY = 0;
+    let initialX = 0;
+    let initialY = 0;
+    let stickerImage = null;
+    let stickerSize = 0;
+
+    // Add these event listeners after creating the overlay canvas
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    overlayCanvas.style.cursor = 'move';
+
+    overlayCanvas.addEventListener('mousedown', startDragging);
+    overlayCanvas.addEventListener('mousemove', drag);
+    overlayCanvas.addEventListener('mouseup', stopDragging);
+
+    function startDragging(e) {
+        initialX = e.clientX - currentX;
+        initialY = e.clientY - currentY;
+        isDragging = true;
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            drawSticker(); // Redraw sticker at new position
+        }
+    }
+
+    function stopDragging() {
+        isDragging = false;
+    }
+
+    function drawSticker() {
+        const ctx = overlayCanvas.getContext('2d');
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        
+        if (stickerImage) {
+            // Calculate relative positions (0-1)
+            const relativeX = currentX / overlayCanvas.width;
+            const relativeY = currentY / overlayCanvas.height;
+            const relativeStickerSize = stickerSize / overlayCanvas.width;
+            
+            // Draw sticker at current position
+            ctx.drawImage(stickerImage, currentX, currentY, stickerSize, stickerSize);
+            
+            // Update hidden form fields with relative values
+            document.getElementById('stickerX').value = Math.max(0, Math.min(1, relativeX));
+            document.getElementById('stickerY').value = Math.max(0, Math.min(1, relativeY));
+            document.getElementById('stickerSize').value = Math.max(0, Math.min(1, relativeStickerSize));
+            document.getElementById('canvasWidth').value = document.getElementById('snapshotCanvas').width;
+            document.getElementById('canvasHeight').value = document.getElementById('snapshotCanvas').height;
+
+        }
+    }
+
+
     let hasImage = false;
     let hasSticker = false;
 
     function enableSubmit() {
         hasSticker = true;
         updateSubmitButton();
+        
+        const selectedSticker = document.querySelector('input[name="selectedSticker"]:checked');
+        const video = document.getElementById('webcamPreviewVideo');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        
+        overlayCanvas.width = video.offsetWidth;
+        overlayCanvas.height = video.offsetHeight;
+        
+        if (selectedSticker) {
+            stickerImage = new Image();
+            stickerImage.src = selectedSticker.value;
+            stickerSize = video.offsetWidth * 0.3;
+            
+            stickerImage.onload = function() {
+                // Initial center position
+                currentX = (overlayCanvas.width - stickerSize) / 2;
+                currentY = (overlayCanvas.height - stickerSize) / 2;
+                
+                // Update hidden form fields with initial position
+                document.getElementById('stickerX').value = currentX;
+                document.getElementById('stickerY').value = currentY;
+                document.getElementById('stickerSize').value = stickerSize;
+                
+                drawSticker();
+            };
+        }
     }
+
+
+    // Add resize handler to keep overlay aligned
+    window.addEventListener('resize', function() {
+        const video = document.getElementById('webcamPreviewVideo');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        overlayCanvas.width = video.offsetWidth;
+        overlayCanvas.height = video.offsetHeight;
+    });
 
     function updateSubmitButton() {
         const submitButton = document.getElementById('submitButton');
@@ -165,6 +265,8 @@
             // Display the snapshot preview image
             snapshotPreviewImage.src = imageDataURL;
             snapshotPreviewImage.style.display = 'block';
+            hasImage = true;
+            updateSubmitButton();
             // Console log the size of the snapshot (width and height in pixels)
             console.log('Snapshot size: ' + canvas.width + 'x' + canvas.height);
         });

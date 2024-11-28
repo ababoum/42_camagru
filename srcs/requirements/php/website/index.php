@@ -280,7 +280,18 @@ try {
                 if (isset($_POST['webcamImage']) && isset($_POST['selectedSticker'])) {
                     $img = preg_replace('#^data:image/\w+;base64,#i', '', $_POST['webcamImage']);
                     $filter = $_POST['selectedSticker'];
-                    (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
+                    
+                    // Convert position and size values to floats (since they are relative values between 0 and 1)
+                    $pos_x = isset($_POST['stickerX']) ? (float)$_POST['stickerX'] : 0.5;
+                    $pos_y = isset($_POST['stickerY']) ? (float)$_POST['stickerY'] : 0.5;
+                    $filter_size = isset($_POST['stickerSize']) ? (float)$_POST['stickerSize'] : 0.3;
+                    
+                    // Ensure values are between 0 and 1
+                    $pos_x = max(0, min(1, $pos_x));
+                    $pos_y = max(0, min(1, $pos_y));
+                    $filter_size = max(0, min(1, $filter_size));
+                    
+                    (new Webcam())->save_shot($img, $filter, $_SESSION['id'], $pos_x, $pos_y, $filter_size);
                 } else {
                     throw new Exception("No image or filter sent.");
                 }

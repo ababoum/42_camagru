@@ -32,7 +32,7 @@ class Webcam
         require('templates/webcam.php');
     }
 
-    public function save_shot(string $img, string $filter, string $user_id)
+    public function save_shot(string $img, string $filter, string $user_id, float $pos_x, float $pos_y, float $filter_size)
     {
         // Decode the base64 image
         $img = base64_decode($img);
@@ -95,7 +95,7 @@ class Webcam
         }
     
         // Superimpose images and save final image in uploads folder
-        if (ImgTools::super_impose($img, $filter, $new_img_path) === false) {
+        if (ImgTools::super_impose($img, $filter, $new_img_path, $pos_x, $pos_y, $filter_size) === false) {
             throw new \Exception('Error while superimposing image');
         }
     
