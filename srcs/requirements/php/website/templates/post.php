@@ -46,7 +46,7 @@ foreach ($comments as $comment) {
     <?php
     if ($comment->author_id === $current_user_id) {
         ?>
-        <a href="index.php?action=delete_comment&id=<?= $comment->id ?>&post_id=<?= $post->id ?>">Delete</a>
+        <a href="index.php?action=delete_comment&id=<?= $comment->id ?>&post_id=<?= $post->id ?>" class="button is-danger is-small">Delete</a>
         <?php
     }
     ?>

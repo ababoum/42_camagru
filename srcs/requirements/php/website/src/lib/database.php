@@ -15,15 +15,28 @@ class DatabaseConnection
             $dbname = DBNAME;
             $dbuser = DBUSER;
             $dbpass = DBPASS;
-            $this->database = new \PDO(
-                "pgsql:host=$dbhost;dbname=$dbname",
-                $dbuser,
-                $dbpass,
-                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-            );
+            try {
+                $this->database = new \PDO(
+                    "pgsql:host=$dbhost;dbname=$dbname",
+                    $dbuser,
+                    $dbpass,
+                    [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+                );
+            } catch (\PDOException $e) {
+                // Handle connection error
+                throw new \Exception('Database connection failed: ' . $e->getMessage());
+            }
         }
-    
         return $this->database;
     }
-    
+
+    public function testConnection(): bool
+    {
+        try {
+            $statement = $this->getConnection()->query("SELECT 1");
+            return $statement !== false;
+        } catch (\PDOException $e) {
+            throw new \Exception('Database connection test failed: ' . $e->getMessage());
+        }
+    }
 }

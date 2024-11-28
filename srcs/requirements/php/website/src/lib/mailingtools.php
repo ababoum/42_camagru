@@ -90,6 +90,8 @@ class MailingTools
                 Please click on the following link to reset your password:
 
                 $password_link
+
+                Warning: this link is valid for 5 minutes.
                 MESSAGE;
 
             // Send the email

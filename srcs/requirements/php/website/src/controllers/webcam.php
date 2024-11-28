@@ -40,18 +40,18 @@ class Webcam
             throw new \Exception('Error while decoding image (snapshot)');
         }
     
-        // Check if the image is within the size limit (e.g., 2MB)
-        $maxFileSize = 2 * 1024 * 1024; // 2MB
+        // Check if the image is within the size limit (5 MB)
+        $maxFileSize = 5 * 1024 * 1024; // 5MB
         if (strlen($img) > $maxFileSize) {
-            throw new \Exception('Image is too large. Maximum size is 2MB.');
+            throw new \Exception('Image is too large. Maximum size is 5MB.');
         }
     
         // Validate the image type
         $f = finfo_open();
         $mime_type = finfo_buffer($f, $img, FILEINFO_MIME_TYPE);
-        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        $allowedMimeTypes = ['image/jpeg', 'image/png'];
         if (!in_array($mime_type, $allowedMimeTypes)) {
-            throw new \Exception('Invalid image type. Only JPEG, PNG, and GIF are allowed.');
+            throw new \Exception('Invalid image type. Only JPEG and PNG are allowed.');
         }
     
         // Generate a GD image
@@ -87,10 +87,10 @@ class Webcam
     
         // Generate a unique filename with a secure random string
         $new_img_name = bin2hex(random_bytes(16)) . '.png';
-        $new_img_path = 'uploads/' . $new_img_name;
+        $new_img_path = 'uploads/users_source/' . $new_img_name;
     
         // Ensure the uploads directory exists and is writable
-        if (!is_dir('uploads') || !is_writable('uploads')) {
+        if (!is_dir('uploads/users_source') || !is_writable('uploads/users_source')) {
             throw new \Exception('Upload directory is not accessible or writable.');
         }
     

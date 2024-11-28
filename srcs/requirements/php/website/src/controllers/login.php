@@ -57,14 +57,14 @@ class Login
         }
 
         // Update the password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $statement = $userRepository->connection->getConnection()->prepare(
-            'UPDATE users SET password = :password WHERE email = :email'
-        );
-        $statement->execute([
-            ':password' => $hashed_password,
-            ':email' => $email
-        ]);
+        $user = $userRepository->get_user_by_email($email);
+        try {
+            $userRepository->update_password($user->id, $password);
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header('Location: index.php?action=new_password&token=' . $token . '&email=' . $email);
+            exit();
+        }
 
         // Delete the token from the database
         $statement = $userRepository->connection->getConnection()->prepare(
@@ -142,7 +142,7 @@ class Login
         $user = $userRepository->get_user_by_email($email);
 
         if (!$user) {
-            $_SESSION['error'] = 'No account found with that email address.';
+            $_SESSION['error'] = 'No account found with the email address: <b>'. $email . '</b>';
             header('Location: index.php?action=reset_password');
             exit();
         }
@@ -162,7 +162,7 @@ class Login
         // Add the token to the database
         $statement = $userRepository->connection->getConnection()->prepare(
             'INSERT INTO password_resets (email, token, expiration)
-            VALUES (:email, :token, DATE_ADD(NOW(), INTERVAL 5 MINUTE))'
+            VALUES (:email, :token, NOW() + INTERVAL \'5 minutes\')'
         );
         $statement->bindValue(':email', $email);
         $statement->bindValue(':token', $hashed_token);

@@ -10,7 +10,7 @@ use Application\Model\Post\PostRepository;
 
 class Gallery
 {
-    public function execute_page(int $page, string $current_user_id)
+    public function execute_page(int $page, int $current_user_id)
     {
         $postRepository = new PostRepository();
         $postRepository->connection = new DatabaseConnection();

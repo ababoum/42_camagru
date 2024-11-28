@@ -32,7 +32,7 @@ if (empty($posts)) {
                 <img src="<?= $post->image_path; ?>" alt="Picture taken on <?= $post->creation_date; ?>" width="400"
                     height="auto" />
                 <br />
-                <?php if ($current_user_id) {
+                <?php if ($current_user_id >= 0) {
                     if ($post->does_current_user_like_post) { ?>
                         <a href="index.php?action=unlike_post&id=<?= urlencode($post->id) ?>&page=<?= $page ?>">Dislike 👎 —</a>
                     <?php } else { ?>

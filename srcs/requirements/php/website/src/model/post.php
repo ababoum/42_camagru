@@ -76,7 +76,7 @@ class PostRepository
         }
     }
 
-    public function get_posts_by_page(int $page_number, string $current_user_id): array
+    public function get_posts_by_page(int $page_number, int $current_user_id): array
     {
         try {
             $statement = $this->connection->getConnection()->prepare(

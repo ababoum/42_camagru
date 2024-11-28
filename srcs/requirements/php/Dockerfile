@@ -28,4 +28,15 @@ COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
 # Enable Apache modules
 RUN a2enmod rewrite
 
+# Enable PHP error logging
+RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/php.ini && \
+    echo "display_errors = On" >> /usr/local/etc/php/php.ini && \
+    echo "log_errors = On" >> /usr/local/etc/php/php.ini && \
+    echo "error_log = /var/log/php_errors.log" >> /usr/local/etc/php/php.ini
+
+# Create the PHP error log file and set permissions
+RUN touch /var/log/php_errors.log && \
+    chown www-data:www-data /var/log/php_errors.log && \
+    chmod 664 /var/log/php_errors.log
+
 EXPOSE 80

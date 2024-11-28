@@ -55,28 +55,65 @@ if (isset($_SESSION['error'])) {
 ?>
 
 <!-- UPDATE INFO FORM -->
-<form action="index.php?action=update_user" method="post">
-    <div>
-        <label for="username">Username</label><br />
-        <input class="input" type="text" id="username" name="username" placeholder="Username" value="<?= $user->username ?>" />
-    </div>
-    <div>
-        <label for="email">Email</label><br />
-        <input class="input" type="email" id="email" name="email" placeholder="Email address" value="<?= $user->email ?>" />
-    </div>
-    <div>
-        <label for="password">Password</label><br />
-        <input class="input" type="password" id="password" name="password" placeholder="Password" />
-    </div>
-    <div>
-        <label for="password">Confirm password</label><br />
-        <input class="input" type="password" id="re_password" name="re_password" placeholder="Confirm password" />
-    </div>
-    <br>
-    <div>
-        <input class="button is-dark" value="Update" type="submit" />
+<form action="index.php?action=update_username" method="post">
+    <h3 class="title is-4">Update Username</h3>
+    <div class="field">
+        <div class="columns is-vcentered">
+            <div class="column is-narrow">
+                <div class="control">
+                    <input type="text" name="username" class="input is-small" style="width: 200px;" placeholder="New Username" required>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="control">
+                    <button type="submit" name="update_username" class="button is-link is-small">Update Username</button>
+                </div>
+            </div>
+        </div>
     </div>
 </form>
+
+<form action="index.php?action=update_email" method="post">
+    <h3 class="title is-4">Update Email</h3>
+    <div class="field">
+        <div class="columns is-vcentered">
+            <div class="column is-narrow">
+                <div class="control">
+                    <input type="email" name="email" class="input is-small" style="width: 200px;" placeholder="New Email" required>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="control">
+                    <button type="submit" name="update_email" class="button is-link is-small">Update Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form action="index.php?action=update_password" method="post">
+    <h3 class="title is-4">Update Password</h3>
+    <div class="field">
+        <div class="columns is-vcentered">
+            <div class="column is-narrow">
+                <div class="control">
+                    <input type="password" name="password" class="input is-small" style="width: 200px;" placeholder="New Password" required>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="control">
+                    <input type="password" name="re_password" class="input is-small" style="width: 200px;" placeholder="Confirm New Password" required>
+                </div>
+            </div>
+            <div class="column is-narrow">
+                <div class="control">
+                    <button type="submit" name="update_password" class="button is-link is-small">Update Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 
 <?php $content = ob_get_clean(); ?>
 

@@ -36,10 +36,11 @@ class UserRepository {
         }
 
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = $1"
+            "SELECT id, username, email, password, active, accept_notifications FROM users WHERE username = :username"
         );
-        $statement->execute([$username]);
+        $statement->execute([':username' => $username]);
         $row = $statement->fetch();
+        
 
         if ($row === false || !password_verify($password, $row['password'])) {
             throw new \Exception('Invalid credentials.');
@@ -91,9 +92,14 @@ class UserRepository {
         $hashedActivationCode = password_hash($activationCode, PASSWORD_ARGON2ID);
 
         $statement = $this->connection->getConnection()->prepare(
-            "INSERT INTO users (username, password, email, activation_code) VALUES ($1, $2, $3, $4) RETURNING id"
+            'INSERT INTO users (username, password, email, activation_code) VALUES (:username, :password, :email, :activation_code) RETURNING id'
         );
-        $statement->execute([$username, $hashedPassword, $email, $hashedActivationCode]);
+        $statement->execute([
+            ':username' => $username,
+            ':password' => $hashedPassword,
+            ':email' => $email,
+            ':activation_code' => $hashedActivationCode
+        ]);
 
         if ($statement->rowCount() === 0) {
             throw new \Exception('Failed to create user. Please try again.');
@@ -112,14 +118,11 @@ class UserRepository {
     }
 
     public function get_user_by_id(string $user_id): User {
-        debug_to_console($this->connection);
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT username, email, active, accept_notifications FROM users WHERE id = $1"
+            "SELECT username, email, active, accept_notifications FROM users WHERE id = :id"
         );
-        $statement->execute([intval($user_id)]);
-        debug_to_console(intval($user_id));
+        $statement->execute([':id' => $user_id]);
         $row = $statement->fetch();
-        debug_to_console($row);
 
         if ($row === false) {
             throw new \Exception('User not found.');
@@ -130,19 +133,19 @@ class UserRepository {
 
     public function get_user_by_email(string $email): ?User {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id, username, email, active, accept_notifications FROM users WHERE email = $1"
+            'SELECT id, username, email, active, accept_notifications FROM users WHERE email = :email'
         );
-        $statement->execute([$email]);
+        $statement->execute([':email' => $email]);        
         $row = $statement->fetch();
-
+    
         return $row ? $this->createUserFromRow($row) : null;
     }
 
     public function find_unverified_user(string $email, string $activationCode): int {
         $statement = $this->connection->getConnection()->prepare(
-            'SELECT id, activation_code FROM users WHERE active = FALSE AND email = $1'
+            'SELECT id, activation_code FROM users WHERE active = FALSE AND email = :email'
         );
-        $statement->execute([$email]);
+        $statement->execute([':email' => $email]);        
         $row = $statement->fetch();
 
         if ($row === false || !password_verify($activationCode, $row['activation_code'])) {
@@ -154,9 +157,9 @@ class UserRepository {
 
     public function activate_user(int $userId): bool {
         $statement = $this->connection->getConnection()->prepare(
-            'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = $1'
+            'UPDATE users SET active = TRUE, activated_at = CURRENT_TIMESTAMP WHERE id = :userId'
         );
-        return $statement->execute([$userId]);
+        return $statement->execute([':userId' => $userId]);        
     }
 
     public function update_username(string $id, string $newUsername): string {
@@ -178,7 +181,7 @@ class UserRepository {
         return $newUsername;
     }
 
-    public function updateEmail(string $id, string $newEmail): string {
+    public function update_email(string $id, string $newEmail): string {
         $newEmail = $this->validate($newEmail);
 
         if (empty($newEmail) || strlen($newEmail) > self::EMAIL_MAX_LENGTH || !filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
@@ -193,7 +196,7 @@ class UserRepository {
         return $newEmail;
     }
 
-    public function updatePassword(string $id, string $newPassword): void {
+    public function update_password(string $id, string $newPassword): void {
         if (empty($newPassword)) {
             throw new \Exception('Password is required.');
         }
@@ -205,7 +208,8 @@ class UserRepository {
     }
 
     public function update_email_notifications(string $userId, bool $acceptNotifications): bool {
-        $this->updateUserField($userId, 'accept_notifications', $acceptNotifications);
+        error_log('Test: '. ($acceptNotifications ? 'true' : 'false'));
+        $this->updateUserField($userId, 'accept_notifications', ($acceptNotifications ? 1 : 0));
         return $acceptNotifications;
     }
 
@@ -223,17 +227,18 @@ class UserRepository {
 
     private function userExists(string $field, string $value): bool {
         $statement = $this->connection->getConnection()->prepare(
-            "SELECT id FROM users WHERE $field = $1"
+            "SELECT id FROM users WHERE $field = :value"
         );
-        $statement->execute([$value]);
+        $statement->execute([':value' => $value]);
+        
         return $statement->fetch() !== false;
     }
 
     private function updateUserField(string $id, string $field, $value): void {
         $statement = $this->connection->getConnection()->prepare(
-            "UPDATE users SET $field = $1 WHERE id = $2"
+            "UPDATE users SET $field = :value WHERE id = :id"
         );
-        $statement->execute([$value, $id]);
+        $statement->execute([':value' => $value, ':id' => $id]);        
 
         if ($statement->rowCount() === 0) {
             throw new \Exception('Failed to update user. Please try again.');

@@ -1,4 +1,5 @@
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<!DOCTYPE html>
+<nav class="navbar" role="navigation" aria-label="main navigation" style="background-color:#ced4de;">
     <div class="navbar-brand">
         <a class="navbar-item" href="index.php">
             <img src="assets/camera.png" width="28" height="28">

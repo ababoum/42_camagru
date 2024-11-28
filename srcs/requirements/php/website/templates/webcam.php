@@ -32,7 +32,7 @@
                                 </div>
                                 <div class="columns is-centered is-vcentered">
                                     <div class="column is-flex is-justify-content-center">
-                                        <input type="file" id="imageUpload" accept="image/png" onchange="previewImage(event);updateImageInput(event)" class="is-fullwidth">
+                                        <input type="file" id="imageUpload" accept="image/png, image/jpeg" onchange="previewImage(event);updateImageInput(event)" class="is-fullwidth">
                                     </div>
                                 </div>
                                 <canvas id="snapshotCanvas" style="display: none;"></canvas>
@@ -85,14 +85,28 @@
                     <!-- PREVIEW OF POSTS -->
                     <div class="box">
                         <h3 class="title is-5 has-text-centered">Last pictures taken</h3>
+                        <div class="field is-grouped is-grouped-centered mb-4">
+                            <div class="control">
+                                <input type="number" id="numPictures" class="input is-small" min="1" max="20" value="5" style="width: 100px;">
+                            </div>
+                            <div class="control">
+                                <button class="button is-small" onclick="updatePicturesCount()">Update</button>
+                            </div>
+                            <div class="control">
+                                <button class="button is-small" onclick="showAllPictures()">MAX</button>
+                            </div>
+                        </div>
+
                         <?php if (empty($posts)) { ?>
                             <p class="has-text-centered">No posts available.</p>
                         <?php } ?>
-                        <?php foreach ($posts as $post) { ?>
+                        <?php 
+                        $numPictures = isset($_GET['num']) ? min((int)$_GET['num'], 20) : 5;
+                        foreach (array_slice($posts, 0, $numPictures) as $post) { ?>
                             <div class="box is-flex is-justify-content-center">
                                 <div class="columns is-vcentered is-mobile">
                                     <div class="column">
-                                        <img src="<?= $post->image_path; ?>" alt="<?= $post->title; ?>" class="image is-responsive" />
+                                        <img src="<?= $post->image_path; ?>" alt="<?= $post->title; ?>" style="width: 150px;" />
                                     </div>
                                     <div class="column">
                                         <button class="button is-danger is-fullwidth" onclick="window.location.href='index.php?action=delete_post&id=<?= $post->id; ?>&source=cam'">Delete</button>
@@ -108,8 +122,17 @@
 </section>
 
 <script>
+    let hasImage = false;
+    let hasSticker = false;
+
     function enableSubmit() {
-        document.getElementById('submitButton').disabled = false;
+        hasSticker = true;
+        updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+        const submitButton = document.getElementById('submitButton');
+        submitButton.disabled = !(hasImage && hasSticker);
     }
 
     // Handle webcam preview and snapshot
@@ -130,7 +153,7 @@
                     console.log('Error accessing webcam:', error);
                 });
         }
-
+        
         // Handle snapshot capture
         takeSnapshotButton.addEventListener('click', function () {
             // Capture snapshot from the video stream
@@ -156,6 +179,8 @@
             reader.onload = function (e) {
                 snapshotPreviewImage.src = e.target.result;
                 snapshotPreviewImage.style.display = 'block';
+                hasImage = true;
+                updateSubmitButton();
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -171,6 +196,20 @@
         };
         reader.readAsDataURL(file);
     }
+
+    function updatePicturesCount() {
+        const num = document.getElementById('numPictures').value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('num', num);
+        window.location.href = currentUrl.toString();
+    }
+
+    function showAllPictures() {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('num', <?= count($posts) ?>);
+    window.location.href = currentUrl.toString();
+    }
+
 </script>
 
 <style>

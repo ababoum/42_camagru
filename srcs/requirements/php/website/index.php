@@ -42,11 +42,11 @@ try {
             if ($_GET['action'] === 'gallery') {
                 if (isset($_GET['page']) && $_GET['page'] > 0) {
                     $page = $_GET['page'];
-                    (new Gallery())->execute_page($page, '');
+                    (new Gallery())->execute_page($page, -1);
                 } else if (isset($_GET['page']) && $_GET['page'] <= 0) {
                     throw new Exception('Page number must be greater than 0');
                 } else {
-                    (new Gallery())->execute_page(1, ''); // page 1 by default
+                    (new Gallery())->execute_page(1, -1); // page 1 by default
                 }
             }
             // POST RELATED ROUTES
@@ -152,11 +152,11 @@ try {
             if ($_GET['action'] === 'gallery') {
                 if (isset($_GET['page']) && $_GET['page'] > 0) {
                     $page = $_GET['page'];
-                    (new Gallery())->execute_page($page, $_SESSION['id']);
+                    (new Gallery())->execute_page($page, intval($_SESSION['id']));
                 } else if (isset($_GET['page']) && $_GET['page'] <= 0) {
                     throw new Exception('Page number must be greater than 0');
                 } else {
-                    (new Gallery())->execute_page(1, $_SESSION['id']); // page 1 by default
+                    (new Gallery())->execute_page(1, intval($_SESSION['id'])); // page 1 by default
                 }
             }
             // POST RELATED ROUTES
@@ -232,18 +232,27 @@ try {
                 }
             }
             // USER RELATED ROUTES
-            else if ($_GET['action'] === 'update_user') {
-                // Received update form data
+            else if ($_GET['action'] === 'update_username') {
+                // Received update form data (username)
                 $username = $_POST['username'] ?? "";
+                $id = $_SESSION['id'] ?? "";
+                (new Profile())->update_username($id, $username);
+            } else if ($_GET['action'] === 'update_email') {
+                // Received update form data (email)
                 $email = $_POST['email'] ?? "";
+                $id = $_SESSION['id'] ?? "";
+                (new Profile())->update_email($id, $email);
+            } else if ($_GET['action'] === 'update_password') {
+                // Received update form data (password)
                 $password = $_POST['password'] ?? "";
                 $re_password = $_POST['re_password'] ?? "";
                 $id = $_SESSION['id'] ?? "";
-                (new Profile())->update_user($id, $username, $email, $password, $re_password);
+                (new Profile())->update_password($id, $password, $re_password);
             } else if ($_GET['action'] === 'update_email_notifications') {
                 if (isset($_GET['value'])) {
-                    $value = $_GET['value'];
+                    $value = intval($_GET['value']);
                     $user_id = $_SESSION['id'];
+                    error_log('Value is: '. $value);
                     (new Profile())->update_email_notifications($user_id, $value);
                 } else {
                     throw new Exception('No value sent');
@@ -269,7 +278,7 @@ try {
                     throw new Exception("You need to be an active user to access this page.");
                 }
                 if (isset($_POST['webcamImage']) && isset($_POST['selectedSticker'])) {
-                    $img = str_replace('data:image/png;base64,', '', $_POST['webcamImage']);
+                    $img = preg_replace('#^data:image/\w+;base64,#i', '', $_POST['webcamImage']);
                     $filter = $_POST['selectedSticker'];
                     (new Webcam())->save_shot($img, $filter, $_SESSION['id']);
                 } else {

@@ -14,7 +14,7 @@ class Auth
     public function activate_user(string $email, string $activation_code)
     {
         $userRepository = new UserRepository();
-        $userRepository->$connection = new DatabaseConnection();
+        $userRepository->connection = new DatabaseConnection();
 
         $user_id = $userRepository->find_unverified_user($email, $activation_code);
 
